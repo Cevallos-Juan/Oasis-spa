@@ -1,0 +1,26 @@
+{
+  "name": "gestion_oasis_spa",
+  "version": "1.0.0",
+  "description": "Sistema de gestión para Oasis Spa",
+  "main": "scripts.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "spa",
+    "gestión",
+    "sqlite",
+    "nodejs"
+  ],
+  "author": "Cevallos Juan",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.2",
+    "pdfkit": "^0.16.0",
+    "sqlite3": "^5.1.7"
+  }
+}

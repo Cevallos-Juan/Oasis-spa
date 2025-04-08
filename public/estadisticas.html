@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oasis Spa - Estadísticas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script> <!-- Librería para gráficos -->
+    <script src="scripts.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5deb3;
+        }
+
+        .header-container {
+            background-color: #fff8dc;
+            color: #333;
+            padding: 45px 12px;
+            text-align: center;
+            border-radius: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #A67B5B;
+            transform: scale(1.1);
+        }
+
+        nav ul li a.active {
+            color: #A67B5B;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px;
+        }
+
+        .floating-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .floating-box h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: 600px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #fff8dc;
+            margin-top: 20px;
+        }
+    </style>  
+</head>
+
+<body>
+    <div class="header-container">
+        <h1>Estadísticas</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="consultar-ingresos.html">Consultar Ingresos</a></li>
+                <li><a href="citas.html">Citas</a></li>
+                <li><a href="estadisticas.html" class="active">Estadísticas</a></li>
+                <li><a href="generar-reportes.html">Generar Reportes</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <main class="container">
+        <div class="floating-box">
+            <h3>Estadísticas Semanales</h3>
+            <canvas id="graficoSemanal" aria-label="Gráfico de estadísticas semanales" role="img"></canvas>
+            <p class="fallback-text" style="text-align: center; display: none;">El gráfico no se pudo cargar.</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Oasis Spa. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

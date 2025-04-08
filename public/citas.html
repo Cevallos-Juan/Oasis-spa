@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Citas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js" defer></script>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5deb3;
+            color: #333;
+        }
+
+        /* Encabezado */
+        .header-container {
+            background-color: #fff8dc;
+            color: #333;
+            padding: 45px 20px; /* Ajustar el espaciado interno */
+            text-align: center;
+            border-radius: 20px; /* Bordes redondeados */
+            margin: 0px auto; /* Espaciado superior e inferior */
+            max-width: 1200px; /* Ancho máximo */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para el efecto flotante */
+        }
+
+        .header-container h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .menu-container {
+            margin-top: 20px; /* Espaciado entre el título y la barra de menú */
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: #333;
+            text-decoration: none; /* Elimina la línea debajo del texto */
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.3s ease; /* Transición suave */
+        }
+
+        nav ul li a:hover {
+            color: #A67B5B; /* Cambia el color al pasar el ratón */
+            transform: scale(1.1); /* Aumenta ligeramente el tamaño */
+        }
+
+        /* Contenedor principal */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 10px auto;
+            background: #fff8dc;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            justify-content: center; /* Centrar los elementos */
+        }
+
+        .floating-box {
+            flex: 1 1 calc(50% - 20px);
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .floating-box h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center; /* Centrar el título */
+        }
+
+        /* Tabla de citas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table thead {
+            background-color: #A67B5B;
+            color: white;
+        }
+
+        table th, table td {
+            text-align: center; /* Centrar contenido de las columnas */
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Estilo para citas canceladas */
+        .cancelada {
+            background-color: #ffcccc; /* Rojo claro más intenso */
+            color: #b30000; /* Texto en rojo oscuro */
+            font-weight: bold; /* Resaltar el texto */
+        }
+
+        /* Estilo para el selector de estado */
+        select {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            border-color: #A67B5B;
+            background-color: #f9f9f9;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #8B5E3C;
+            box-shadow: 0 0 5px rgba(139, 94, 60, 0.5);
+        }
+
+        /* Contenedor con desplazamiento vertical */
+        .scrollable-table {
+            max-height: 400px; /* Altura máxima antes de habilitar el desplazamiento */
+            overflow-y: auto; /* Habilitar desplazamiento vertical */
+        }
+
+        /* Espaciado para el botón de añadir cita */
+        #addCitaForm button {
+            margin-top: 20px; /* Espaciado adicional */
+        }
+
+        /* Mensaje flotante */
+        #mensajeFlotante {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+
+        #mensajeFlotante.error {
+            background-color: #f44336;
+        }
+
+        /* Modal */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modalContent {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .estado-pendiente {
+            background-color: #fff;
+        }
+
+        .estado-asistio {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .estado-no-asistio {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Citas</h1>
+            <div class="menu-container">
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="consultar-ingresos.html">Consultar Ingresos</a></li>
+                        <li><a href="citas.html" class="active">Citas</a></li> <!-- Clase activa -->
+                        <li><a href="estadisticas.html">Estadísticas</a></li>
+                        <li><a href="generar-reportes.html">Generar Reportes</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <!-- Contenedor para añadir citas -->
+            <div class="floating-box">
+                <h3>Añadir Citas Programadas</h3>
+                <form id="addCitaForm">
+                    <label for="nombreCliente">Nombre del Cliente:</label>
+                    <input type="text" id="nombreCliente" name="nombreCliente" required>
+
+                    <label for="servicio">Se Realizará:</label>
+                    <input type="text" id="servicio" name="servicio" required>
+
+                    <label for="fechaCita">Fecha:</label>
+                    <input type="date" id="fechaCita" name="fechaCita" required>
+
+                    <label for="horaCita">Hora:</label>
+                    <input type="time" id="horaCita" name="horaCita" required>
+
+                    <button type="submit">Añadir Cita</button>
+                </form>
+            </div>
+
+            <!-- Contenedor para consultar citas -->
+            <div class="floating-box">
+                <h3>Consultar Citas</h3>
+                <div class="scrollable-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Servicio</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCitas">
+                            <!-- Las citas se cargarán dinámicamente aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mensaje flotante -->
+    <div id="mensajeFlotante"></div>
+
+    <!-- Modal -->
+    <div id="modal">
+        <div id="modalContent"></div>
+    </div>
+
+    <script>
+        // Función para mostrar un mensaje flotante
+        function mostrarMensajeFlotante(mensaje, tipo = 'success') {
+            const mensajeFlotante = document.getElementById('mensajeFlotante');
+            mensajeFlotante.textContent = mensaje;
+            mensajeFlotante.className = tipo;
+            mensajeFlotante.style.display = 'block';
+
+            setTimeout(() => {
+                mensajeFlotante.style.display = 'none';
+            }, 3000);
+        }
+
+        // Mostrar modal
+        function mostrarModal(contenidoHTML) {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = contenidoHTML;
+            modal.style.display = 'flex';
+        }
+
+        // Cerrar modal
+        function cerrarModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        }
+
+        // Función para cargar citas
+        async function cargarCitas() {
+            try {
+                const response = await fetch('/api/citas'); // Ruta correcta
+                if (!response.ok) throw new Error('Error al cargar las citas.');
+                const citas = await response.json();
+
+                // Procesar las citas y mostrarlas en la tabla
+                console.log(citas);
+            } catch (error) {
+                console.error('Error al cargar las citas:', error);
+            }
+        }
+
+        // Función para añadir una cita
+        document.getElementById('addCitaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const body = {
+                nombre: document.getElementById('nombreCliente').value,
+                servicio: document.getElementById('servicio').value,
+                fecha: document.getElementById('fechaCita').value,
+                hora: document.getElementById('horaCita').value,
+            };
+
+            try {
+                const response = await fetch('/api/citas', { // Ruta correcta
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                if (response.ok) {
+                    mostrarMensajeFlotante('Cita añadida correctamente');
+                    document.getElementById('addCitaForm').reset();
+                    cargarCitas();
+                } else {
+                    const error = await response.json();
+                    mostrarMensajeFlotante(`Error al añadir la cita: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error al añadir la cita:', error);
+                mostrarMensajeFlotante('Error al conectar con el servidor', 'error');
+            }
+        });
+
+        // Función para cambiar el estado de una cita
+        async function cambiarEstado(select, id) {
+            const nuevoEstado = select.value; // Obtener el estado seleccionado
+
+            try {
+                const response = await fetch(`/api/citas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado }),
+                });
+
+                if (response.ok) {
+                    const fila = document.querySelector(`tr[data-id="${id}"]`);
+                    const dropdown = fila.querySelector('select');
+                    const botonEditar = fila.querySelector('.btn-editar');
+
+                    if (nuevoEstado === 'Asistió') {
+                        // Cambiar el registro a verde
+                        fila.classList.add('estado-asistio');
+                        dropdown.disabled = true; // Deshabilitar el dropdown
+                        botonEditar.disabled = true; // Deshabilitar el botón de editar
+
+                        // Mostrar modal para registrar ingreso
+                        mostrarModal(`
+                            <h3>Registrar Ingreso</h3>
+                            <form id="formIngreso">
+                                <label for="monto">Monto:</label>
+                                <input type="number" id="monto" required>
+
+                                <label for="realizadoPor">¿Quién lo realizó?</label>
+                                <input type="text" id="realizadoPor" required>
+
+                                <label for="foto">Adjuntar Foto:</label>
+                                <div class="custom-file-upload">
+                                    <label class="upload-button" for="fotoInput">Elegir Foto</label>
+                                    <input type="file" id="fotoInput" style="display: none;" required>
+                                    <span id="fileStatus" style="color: #666;">No se ha seleccionado ninguna foto</span>
+                                </div>
+
+                                <button type="submit">Guardar</button>
+                                <button type="button" onclick="cerrarModal()">Cancelar</button>
+                            </form>
+                        `);
+
+                        // Manejar el botón de elegir foto
+                        const fotoInput = document.getElementById('fotoInput');
+                        const fileStatus = document.getElementById('fileStatus');
+                        fotoInput.addEventListener('change', () => {
+                            if (fotoInput.files.length > 0) {
+                                fileStatus.textContent = 'Imagen añadida ✔';
+                                fileStatus.style.color = '#28a745'; // Verde
+                            } else {
+                                fileStatus.textContent = 'No se ha seleccionado ninguna foto';
+                                fileStatus.style.color = '#666'; // Gris
+                            }
+                        });
+
+                        // Manejar el envío del formulario de ingreso
+                        document.getElementById('formIngreso').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const monto = document.getElementById('monto').value;
+                            const realizadoPor = document.getElementById('realizadoPor').value;
+                            const foto = fotoInput.files[0];
+
+                            if (!monto || !realizadoPor || !foto) {
+                                mostrarModal('<p>Todos los campos son obligatorios.</p><button onclick="cerrarModal()">Cerrar</button>');
+                                return;
+                            }
+
+                            const formData = new FormData();
+                            formData.append('monto', monto);
+                            formData.append('realizadoPor', realizadoPor);
+                            formData.append('foto', foto);
+
+                            try {
+                                const ingresoResponse = await fetch('/api/ingresos', {
+                                    method: 'POST',
+                                    body: formData,
+                                });
+
+                                if (ingresoResponse.ok) {
+                                    mostrarMensajeFlotante('Ingreso registrado correctamente');
+                                    cerrarModal();
+                                    cargarCitas(); // Recargar la tabla
+                                } else {
+                                    mostrarMensajeFlotante('Error al registrar el ingreso', 'error');
+                                }
+                            } catch (error) {
+                                console.error('Error al registrar el ingreso:', error);
+                                mostrarMensajeFlotante('Error al conectar con el servidor', 'error');
+                            }
+                        });
+                    } else if (nuevoEstado === 'No asistió') {
+                        // Cambiar el registro a rojo
+                        fila.classList.add('estado-no-asistio');
+                        dropdown.disabled = true; // Deshabilitar el dropdown
+                        botonEditar.disabled = true; // Deshabilitar el botón de editar
+                    } else {
+                        // Cambiar el registro a su estado normal
+                        fila.classList.remove('estado-asistio', 'estado-no-asistio');
+                        dropdown.disabled = false; // Habilitar el dropdown
+                        botonEditar.disabled = false; // Habilitar el botón de editar
+                    }
+                } else {
+                    mostrarMensajeFlotante('Error al actualizar el estado', 'error');
+                }
+            } catch (error) {
+                console.error('Error al actualizar el estado:', error);
+                mostrarMensajeFlotante('Error al conectar con el servidor', 'error');
+            }
+        }
+
+        // Función para eliminar una cita
+        async function eliminarCita(id) {
+            if (confirm('¿Estás seguro de eliminar esta cita?')) {
+                try {
+                    const response = await fetch(`/api/citas/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        mostrarMensajeFlotante('Cita eliminada correctamente');
+                        cargarCitas(); // Recargar la tabla de citas
+                    } else {
+                        mostrarMensajeFlotante('Error al eliminar la cita', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al eliminar la cita:', error);
+                    mostrarMensajeFlotante('Error al conectar con el servidor', 'error');
+                }
+            }
+        }
+
+        // Función para editar una cita (puedes implementar un modal aquí)
+        async function editarCita(id) {
+            try {
+                // Obtener los datos de la cita desde el backend
+                const response = await fetch(`/api/citas/${id}`);
+                if (!response.ok) throw new Error('Error al obtener los datos de la cita.');
+                const cita = await response.json();
+
+                // Crear el formulario de edición
+                const formularioHTML = `
+                    <h3>Editar Cita</h3>
+                    <form id="editarCitaForm">
+                        <label for="nombre">Nombre del Cliente:</label>
+                        <input type="text" id="nombre" name="nombre" value="${cita.nombre}">
+
+                        <label for="fecha">Fecha:</label>
+                        <input type="date" id="fecha" name="fecha" value="${cita.fecha}">
+
+                        <label for="hora">Hora:</label>
+                        <input type="time" id="hora" name="hora" value="${cita.hora}">
+
+                        <label for="servicio">Servicio:</label>
+                        <input type="text" id="servicio" name="servicio" value="${cita.servicio}">
+
+                        <label for="estado">Estado:</label>
+                        <select id="estado" name="estado" class="custom-select">
+                            <option value="Pendiente" ${cita.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="Asistió" ${cita.estado === 'Asistió' ? 'selected' : ''}>Asistió</option>
+                            <option value="No asistió" ${cita.estado === 'No asistió' ? 'selected' : ''}>No asistió</option>
+                        </select>
+
+                        <button type="submit">Guardar Cambios</button>
+                        <button type="button" onclick="cerrarModal()">Cancelar</button>
+                    </form>
+                `;
+
+                // Mostrar el formulario en el modal
+                mostrarModal(formularioHTML);
+
+                // Manejar el envío del formulario
+                const editarCitaForm = document.getElementById('editarCitaForm');
+                editarCitaForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    // Obtener los valores del formulario
+                    const body = {
+                        nombre: document.getElementById('nombre').value,
+                        fecha: document.getElementById('fecha').value,
+                        hora: document.getElementById('hora').value,
+                        servicio: document.getElementById('servicio').value,
+                        estado: document.getElementById('estado').value,
+                    };
+
+                    try {
+                        // Enviar los datos actualizados al backend
+                        const response = await fetch(`/api/citas/${id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body),
+                        });
+
+                        if (response.ok) {
+                            // Actualizar dinámicamente la fila en la tabla
+                            const fila = document.querySelector(`tr[data-id="${id}"]`);
+                            if (fila) {
+                                fila.innerHTML = `
+                                    <td>${body.nombre}</td>
+                                    <td>${body.fecha}</td>
+                                    <td>${body.hora}</td>
+                                    <td>${body.servicio}</td>
+                                    <td>${body.estado}</td>
+                                    <td>
+                                        <button onclick="editarCita(${id})">Editar</button>
+                                        <button onclick="eliminarCita(${id})">Eliminar</button>
+                                    </td>
+                                `;
+                            }
+
+                            // Mostrar mensaje de éxito
+                            mostrarMensajeFlotante('Cita editada correctamente');
+                            cerrarModal();
+                        } else {
+                            const error = await response.json();
+                            mostrarModal(`<p>Error al editar la cita: ${error.error}</p><button onclick="cerrarModal()">Cerrar</button>`);
+                        }
+                    } catch (error) {
+                        console.error('Error al editar la cita:', error);
+                        mostrarModal('<p>Error al editar la cita.</p><button onclick="cerrarModal()">Cerrar</button>');
+                    }
+                });
+            } catch (error) {
+                console.error('Error al cargar los datos de la cita:', error);
+                mostrarModal('<p>Error al cargar los datos de la cita.</p><button onclick="cerrarModal()">Cerrar</button>');
+            }
+        }
+
+        // Eliminar cita
+        function eliminarCita(id) {
+            mostrarModal(`
+                <h3>Confirmar Eliminación</h3>
+                <p>¿Estás seguro de que deseas eliminar esta cita?</p>
+                <button onclick="confirmarEliminar(${id})">Sí, eliminar</button>
+                <button onclick="cerrarModal()">Cancelar</button>
+            `);
+        }
+
+        async function confirmarEliminar(id) {
+            try {
+                const response = await fetch(`/api/citas/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    mostrarMensajeFlotante('Cita eliminada correctamente');
+                    cargarCitas();
+                    cerrarModal();
+                } else {
+                    mostrarMensajeFlotante('Error al eliminar la cita', 'error');
+                }
+            } catch (error) {
+                console.error('Error al eliminar la cita:', error);
+                mostrarMensajeFlotante('Error al conectar con el servidor', 'error');
+            }
+        }
+
+        // Cargar citas al cargar la página
+        document.addEventListener('DOMContentLoaded', cargarCitas);
+
+        // Función para actualizar el estado de una cita
+        async function actualizarEstadoCita(id, nuevoEstado) {
+            if (!['Pendiente', 'Asistió', 'No asistió'].includes(nuevoEstado)) {
+                mostrarModal('<p>Estado no válido.</p><button onclick="cerrarModal()">Cerrar</button>');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/citas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                if (response.ok) {
+                    mostrarModal('<p>Estado actualizado correctamente.</p><button onclick="cerrarModal()">Cerrar</button>');
+                    cargarCitas(); // Recargar la tabla de citas
+                } else {
+                    const error = await response.json();
+                    mostrarModal(`<p>Error al actualizar el estado: ${error.error}</p><button onclick="cerrarModal()">Cerrar</button>`);
+                }
+            } catch (error) {
+                console.error('Error al actualizar el estado de la cita:', error);
+                mostrarModal('<p>Error al actualizar el estado.</p><button onclick="cerrarModal()">Cerrar</button>');
+            }
+        }
+    </script>
+    <!-- Modal para añadir ingreso -->
+    <div id="modalIngreso" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 400px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+            <h3>Añadir Ingreso</h3>
+            <form id="formIngreso">
+                <label for="nombreIngreso">Nombre del Cliente:</label>
+                <input type="text" id="nombreIngreso" name="nombreIngreso" readonly>
+
+                <label for="fechaIngreso">Fecha:</label>
+                <input type="date" id="fechaIngreso" name="fechaIngreso" readonly>
+
+                <label for="servicioIngreso">Servicio:</label>
+                <input type="text" id="servicioIngreso" name="servicioIngreso" readonly>
+
+                <label for="montoIngreso">Monto:</label>
+                <input type="number" id="montoIngreso" name="montoIngreso" required>
+
+                <label for="realizadoPor">¿Quién lo realizó?</label>
+                <input type="text" id="realizadoPor" name="realizadoPor" required>
+
+                <label for="fotoAdjunta">Adjuntar Foto:</label>
+                <input type="file" id="fotoAdjunta" name="fotoAdjunta">
+
+                <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+                    <button type="button" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer style="text-align: center; padding: 10px; background-color: #fff8dc; margin-top: 20px;">
+        <p>&copy; 2025 Oasis Spa. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

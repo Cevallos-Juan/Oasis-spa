@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Ingresos</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js" defer></script>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5deb3;
+            color: #333;
+        }
+
+        /* Encabezado */
+        .header-container {
+            background-color: #fff8dc;
+            color: #333;
+            padding: 45px 20px;
+            text-align: center;
+            border-radius: 20px;
+            margin: 0px auto;
+            max-width: 1200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .menu-container {
+            margin-top: 20px;
+        }
+
+        /* Barra de navegación */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #A67B5B;
+            transform: scale(1.1);
+        }
+
+        nav ul li a.active {
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Contenedor principal */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 10px auto;
+            background: #fff8dc;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .floating-box {
+            flex: 1 1 calc(50% - 20px);
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .floating-box h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Tabla de ingresos */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table thead {
+            background-color: #A67B5B;
+            color: white;
+        }
+
+        table th, table td {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Filtros */
+        .filters form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters form label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .filters .search-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .filters .search-bar input {
+            flex-grow: 1;
+            max-width: 400px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .filters .search-bar button {
+            padding: 8px 15px;
+            font-size: 14px;
+            background-color: #A67B5B;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            width: auto;
+        }
+
+        .filters .search-bar button:hover {
+            background-color: #8B5E3C;
+        }
+
+        /* Estilos para el modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Consultar Ingresos</h1>
+            <div class="menu-container">
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="consultar-ingresos.html" class="active">Consultar Ingresos</a></li>
+                        <li><a href="citas.html">Citas</a></li>
+                        <li><a href="estadisticas.html">Estadísticas</a></li>
+                        <li><a href="generar-reportes.html">Generar Reportes</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <!-- Tabla de ingresos -->
+            <div class="floating-box">
+                <h3>Ingresos</h3>
+                <div style="overflow-x: auto;">
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Monto</th>
+                                    <th>Fecha</th>
+                                    <th>Realizado por</th>
+                                    <th>¿Se realizó?</th>
+                                    <th>40%</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultadosTabla">
+                                <!-- Los resultados se cargarán aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buscar por filtros -->
+            <div class="floating-box">
+                <h3>Buscar por Filtros</h3>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre">
+                    <button type="button" id="searchButton">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Modal reutilizable -->
+    <div id="modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="closeModal" class="close" onclick="cerrarModal()">&times;</span>
+            <div id="modalBody" style="text-align: center;"></div>
+        </div>
+    </div>
+    <div id="loading" style="display: none; text-align: center; margin: 20px;">
+        <p>Cargando datos...</p>
+    </div>
+    <script>
+        // Función para mostrar el modal
+        function mostrarModal(contenidoHTML) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = contenidoHTML;
+            modal.style.display = 'flex';
+
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    cerrarModal();
+                }
+            });
+        }
+
+        // Función para cerrar el modal
+        function cerrarModal() {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            modal.style.display = 'none';
+            modalBody.innerHTML = '';
+        }
+
+        // Función para editar un ingreso
+        async function editarIngreso(id) {
+            try {
+                const response = await fetch(`/api/ingresos/${id}`);
+                if (!response.ok) throw new Error('Error al obtener los datos del ingreso.');
+                const ingreso = await response.json();
+
+                const formularioHTML = `
+                    <h3>Editar Ingreso</h3>
+                    <form id="editarIngresoForm">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" value="${ingreso.nombre}" required>
+                        
+                        <label for="monto">Monto:</label>
+                        <input type="number" id="monto" name="monto" step="any" required />
+                        
+                        <label for="realizado">Fecha:</label>
+                        <input type="date" id="realizado" name="realizado" value="${ingreso.realizado}" required>
+                        
+                        <label for="quien">Lo Realizó:</label>
+                        <input type="text" id="quien" name="quien" value="${ingreso.quien}" required>
+                        
+                        <label for="seRealizo">¿Se realizó?</label>
+                        <input type="text" id="seRealizo" name="seRealizo" value="${ingreso.seRealizo}" required>
+                        
+                        <button type="submit">Guardar Cambios</button>
+                        <button type="button" onclick="cerrarModal()">Cancelar</button>
+                    </form>
+                `;
+
+                mostrarModal(formularioHTML);
+
+                const editarIngresoForm = document.getElementById('editarIngresoForm');
+                editarIngresoForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const nuevoNombre = document.getElementById('nombre').value.trim();
+                    const nuevoMonto = parseFloat(document.getElementById('monto').value);
+                    const nuevaFecha = document.getElementById('realizado').value;
+                    const nuevoQuien = document.getElementById('quien').value.trim();
+                    const nuevoSeRealizo = document.getElementById('seRealizo').value.trim();
+
+                    if (!nuevoNombre || isNaN(nuevoMonto) || nuevoMonto <= 0 || !nuevaFecha || !nuevoQuien || !nuevoSeRealizo) {
+                        mostrarModal('<p>Todos los campos son obligatorios y deben tener valores válidos.</p><button onclick="cerrarModal()">Cerrar</button>');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/ingresos/${id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                nombre: nuevoNombre,
+                                monto: nuevoMonto,
+                                realizado: nuevaFecha,
+                                quien: nuevoQuien,
+                                seRealizo: nuevoSeRealizo
+                            })
+                        });
+
+                        if (response.ok) {
+                            mostrarModal('<p>Ingreso editado correctamente.</p><button onclick="cerrarModal()">Cerrar</button>');
+                            cargarIngresos(); // Recargar la tabla
+                        } else {
+                            const error = await response.json();
+                            mostrarModal(`<p>Error al editar el ingreso: ${error.error}</p><button onclick="cerrarModal()">Cerrar</button>`);
+                        }
+                    } catch (error) {
+                        console.error('Error al editar el ingreso:', error);
+                        mostrarModal('<p>Error al editar el ingreso.</p><button onclick="cerrarModal()">Cerrar</button>');
+                    }
+                });
+            } catch (error) {
+                console.error('Error al cargar los datos del ingreso:', error);
+                mostrarModal('<p>Error al cargar los datos del ingreso.</p><button onclick="cerrarModal()">Cerrar</button>');
+            }
+        }
+
+        // Función para eliminar un ingreso
+        async function eliminarIngreso(id) {
+            const confirmacionHTML = `
+                <p>¿Estás seguro de que deseas eliminar este ingreso?</p>
+                <button onclick="confirmarEliminar(${id})">Sí, eliminar</button>
+                <button onclick="cerrarModal()">Cancelar</button>
+            `;
+            mostrarModal(confirmacionHTML);
+        }
+
+        async function confirmarEliminar(id) {
+            try {
+                const response = await fetch(`/api/ingresos/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    mostrarModal('<p>Ingreso eliminado correctamente.</p><button onclick="cerrarModal()">Cerrar</button>');
+                    cargarIngresos(); // Recargar la tabla
+                } else {
+                    mostrarModal('<p>Error al eliminar el ingreso.</p><button onclick="cerrarModal()">Cerrar</button>');
+                }
+            } catch (error) {
+                console.error('Error al eliminar el ingreso:', error);
+                mostrarModal('<p>Error al eliminar el ingreso.</p><button onclick="cerrarModal()">Cerrar</button>');
+            }
+        }
+
+        // Función para buscar en la tabla
+        function buscar() {
+            const nombre = document.getElementById('searchInput').value.trim(); // Obtener el valor del campo de búsqueda
+            cargarIngresos({ nombre }); // Llamar a la función cargarIngresos con el filtro de nombre
+        }
+
+        // Función para cargar ingresos en la tabla
+        async function cargarIngresos(filtros = {}) {
+            const resultadosTabla = document.getElementById('resultadosTabla');
+            if (!resultadosTabla) {
+                console.error('Error: No se encontró el elemento <tbody> con el ID "resultadosTabla".');
+                return;
+            }
+
+            resultadosTabla.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+
+            try {
+                const params = new URLSearchParams(filtros).toString(); // Convertir los filtros en parámetros de consulta
+                const response = await fetch(`/api/ingresos?${params}`); // Enviar los filtros al servidor
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al obtener los ingresos.');
+                }
+
+                const ingresos = await response.json();
+
+                if (ingresos.length === 0) {
+                    resultadosTabla.innerHTML = '<tr><td colspan="6">No se encontraron resultados.</td></tr>';
+                } else {
+                    ingresos.forEach((ingreso) => {
+                        const fila = document.createElement('tr');
+                        fila.innerHTML = `
+                            <td>${ingreso.nombre}</td>
+                            <td>$${parseFloat(ingreso.monto).toFixed(2)}</td>
+                            <td>${ingreso.realizado}</td>
+                            <td>${ingreso.quien}</td>
+                            <td>${ingreso.seRealizo}</td>
+                            <td>$${(ingreso.monto * 0.4).toFixed(2)}</td>
+                            <td>
+                                <button onclick="editarIngreso(${ingreso.id})">Editar</button>
+                                <button onclick="eliminarIngreso(${ingreso.id})">Eliminar</button>
+                            </td>
+                        `;
+                        resultadosTabla.appendChild(fila);
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar los ingresos:', error);
+                resultadosTabla.innerHTML = '<tr><td colspan="6">Error al cargar los datos.</td></tr>';
+            }
+        }
+
+        // Función para actualizar los registros diarios
+        async function actualizarRegistrosDiarios() {
+            const registrosDiarios = document.getElementById('registrosDiarios');
+            const ingresosDiarios = document.getElementById('ingresosDiarios');
+
+            try {
+                const response = await fetch('/api/ingresos');
+                if (!response.ok) throw new Error('Error al obtener los ingresos.');
+                const ingresos = await response.json();
+
+                const hoy = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
+                const ingresosHoy = ingresos.filter((ingreso) => ingreso.realizado === hoy);
+
+                const totalHoy = ingresosHoy.reduce((total, ingreso) => total + ingreso.monto, 0);
+
+                registrosDiarios.textContent = ingresosHoy.length;
+                ingresosDiarios.textContent = `$${totalHoy.toFixed(2)}`;
+            } catch (error) {
+                console.error('Error al actualizar los registros diarios:', error);
+            }
+        }
+
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarIngresos();
+        });
+
+        // Asociar el evento al botón de búsqueda
+        document.getElementById('searchButton').addEventListener('click', buscar);
+
+        // Función para buscar en la tabla
+        function buscar() {
+            const nombre = document.getElementById('searchInput').value.trim(); // Obtener el valor del campo de búsqueda
+            cargarIngresos({ nombre }); // Llamar a la función cargarIngresos con el filtro de nombre
+        }
+
+        // Asociar el evento al botón de búsqueda rápida
+        document.getElementById('searchButton').addEventListener('click', (event) => {
+            event.preventDefault(); // Evitar que el botón recargue la página
+            buscar(); // Llamar a la función buscar
+        });
+
+        document.getElementById('form-filtros').addEventListener('submit', (event) => {
+            event.preventDefault(); // Evitar recargar la página
+
+            const nombre = document.getElementById('filtro-nombre').value;
+
+            const filtros = {};
+            if (nombre) filtros.nombre = nombre;
+
+            cargarIngresos(filtros); // Llamar a la función para cargar los ingresos con los filtros
+        });
+
+    </script>
+    <footer style="text-align: center; padding: 10px; background-color: #fff8dc; margin-top: 20px;">
+        <p>&copy; 2025 Oasis Spa. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

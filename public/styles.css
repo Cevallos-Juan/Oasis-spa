@@ -1,0 +1,426 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5deb3;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin-bottom: 0; /* Reducir el espacio */
+}
+
+.header-container {
+    background-color: #fff8dc;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    width: 80%;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+header h2 {
+    margin: 10px 0 0;
+    font-size: 1.2em;
+    color: #555;
+    font-weight: normal;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 10px; /* Reducir el espacio */
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    gap: 20px;
+}
+
+.left-container, .right-container {
+    background-color: #fff8dc;
+    border: 1px solid #ffffff;
+    padding: 20px;
+    width: 45%;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.left-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.phrase-of-the-day, .quick-search {
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.phrase-of-the-day {
+    padding: 20px;
+}
+
+.phrase-of-the-day h3 {
+    text-align: center;
+    font-size: 1.8em;
+    color: #A67B5B; /* Color marrón */
+}
+
+.phrase-of-the-day p {
+    font-size: 1.2em;
+    text-align: center;
+    margin-top: 10px;
+    color: #333;
+}
+
+.quick-search {
+    padding: 20px;
+}
+
+.quick-search h3 {
+    text-align: center;
+    font-size: 1.5em;
+    color: #000000;
+}
+
+.quick-search form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quick-search input {
+    width: 80%; /* Agrandar el campo de entrada */
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.quick-search button {
+    width: 15%; /* Ajustar el ancho del botón */
+    padding: 10px;
+    font-size: 0.9em;
+    background-color: #A67B5B; /* Color marrón */
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none; /* Quitar el borde */
+}
+
+.quick-search button:hover {
+    background-color: #8C5E42; /* Color marrón más oscuro */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centrar los elementos del formulario */
+}
+
+label {
+    align-self: center; /* Centrar las etiquetas */
+    margin: 10px 0 5px;
+    width: 80%;
+    max-width: 500px;
+    text-align: center; /* Alinear el texto al centro */
+    color: #333;
+}
+
+input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    width: 80%; /* Agrandar el campo de entrada */
+    max-width: 500px; /* Limitar el ancho máximo */
+}
+
+.right-container h3 {
+    text-align: center;
+    font-size: 1.8em; /* Mismo tamaño que "Frase del día" */
+    margin-bottom: 20px;
+    color: #000000; /* Color marrón */
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    max-width: 500px; /* Limitar el ancho máximo */
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px;
+    font-size: 0.9em;
+    background-color: #A67B5B; /* Color marrón */
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    width: 45%; /* Ajustar el ancho de los botones */
+    border: none; /* Quitar el borde */
+}
+
+button:hover {
+    background-color: #8C5E42; /* Color marrón más oscuro */
+}
+
+/* Cambiar el color del botón "Editar" */
+button.btn-editar {
+    background-color: #A67B5B; /* Marrón, igual que el botón "Eliminar" */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.btn-editar:hover {
+    background-color: #8B5E3C; /* Marrón más oscuro */
+}
+
+/* Contenedor para la tabla con desplazamiento vertical */
+.table-container {
+    max-height: 400px; /* Altura máxima para mostrar 15 filas aproximadamente */
+    overflow-y: auto; /* Habilita el desplazamiento vertical */
+    border: 1px solid #ddd; /* Opcional: agrega un borde para el contenedor */
+    border-radius: 8px; /* Opcional: bordes redondeados */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table thead {
+    background-color: #4CAF50;
+    color: white;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.floating-box {
+    background-color: #fff8dc;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.floating-box h3 {
+    text-align: center;
+    font-size: 1.8em;
+    color: #A67B5B;
+}
+
+#mensaje {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#mensaje.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#mensaje.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+#dailyPhrase {
+    font-family: 'Segoe UI', serif; /* Fuente elegante */
+    font-size: 1.2 rem; /* Tamaño de fuente */
+    font-style: normal; /* Quitar cursiva */
+    color: #4a4a4a; /* Color de texto */
+    text-align: center; /* Centrar el texto */
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    text-align: center; /* Centrar el contenido */
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.custom-file-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; /* Espaciado reducido entre el botón y el mensaje */
+}
+
+.custom-file-upload .upload-button {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white !important; /* Asegurar que el texto sea blanco */
+    background-color: #A67B5B;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px; /* Espacio debajo del botón */
+}
+
+.custom-file-upload .upload-button:hover {
+    background-color: #8B5E3C;
+}
+
+#fileNames {
+    font-size: 14px;
+    color: #dc3545; /* Rojo para el mensaje inicial */
+    text-align: center;
+    margin-top: -20px; /* Espacio pequeño debajo del botón "Seleccionar Fotos" */
+    margin-bottom: 14px; /* Espacio pequeño encima del botón "Registrar ingreso" */
+}
+
+#fileNames.success {
+    color: #28a745; /* Verde para el mensaje de éxito */
+}
+
+.add-income button[type="submit"] {
+    font-weight: bold; /* Negritas para el botón "Registrar ingreso" */
+    color: white; /* Mantener el color blanco */
+}
+
+.add-income input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.estado-pendiente {
+    background-color: #fff;
+}
+
+.estado-asistio {
+    background-color: #c3e6cb;
+    color: #155724;
+}
+
+.estado-no-asistio {
+    background-color: #f5c6cb;
+    color: #721c24;
+}
+
+button[disabled] {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.custom-select {
+    padding: 10px;
+    border: 1px solid #A67B5B;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #fff8dc;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.custom-select:hover {
+    border-color: #8B5E3C;
+    background-color: #f9f9f9;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: #8B5E3C;
+    box-shadow: 0 0 5px rgba(139, 94, 60, 0.5);
+}
+
+.mensaje-exito {
+    color: #28a745; /* Verde */
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.mensaje-error {
+    color: #dc3545; /* Rojo */
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}

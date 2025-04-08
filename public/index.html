@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oasis Spa - Inicio</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js" defer></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        .add-income {
+            background-color: #fff; /* Fondo blanco */
+            padding: 20px; /* Espaciado interno */
+            border-radius: 15px; /* Bordes redondeados */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
+        }
+
+        .add-income h3 {
+            margin-top: 0;
+            font-size: 28px; /* Tamaño más grande para el título */
+            font-weight: bold;
+            color: #333;
+        }
+
+        .add-income label {
+            display: block;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .add-income input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .add-income .button-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-income .button-group button {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #A67B5B;
+            color: white;
+            font-weight: bold;
+        }
+
+        .add-income .button-group button:hover {
+            background-color: #8B5E3C;
+        }
+
+        /* Barra de navegación */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: #333; /* Color normal del texto */
+            text-decoration: none; /* Elimina la línea debajo del texto */
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.3s ease; /* Transición suave */
+        }
+
+        nav ul li a:hover {
+            color: #A67B5B; /* Cambia el color al pasar el ratón */
+            transform: scale(1.1); /* Aumenta ligeramente el tamaño */
+        }
+
+        /* Estilo para el enlace activo */
+        nav ul li a.active {
+            color: #333; /* Mantener el color normal del enlace activo */
+            font-weight: bold;
+            text-decoration: none; /* Sin línea debajo del enlace activo */
+        }
+
+        nav ul li a.active:hover {
+            color: #A67B5B; /* Cambia el color al pasar el ratón */
+            transform: scale(1.1); /* Aumenta ligeramente el tamaño */
+        }
+
+        /* Contenedor principal */
+        .container {
+            display: flex;
+            flex-direction: column; /* Cambiar a diseño en columna */
+            gap: 20px; /* Espaciado entre los contenedores */
+            max-width: 1200px;
+            margin: 0px auto; /* Centrar el contenedor principal */
+            padding: 20px;
+        }
+
+        /* Contenedores flotantes */
+        .left-container,
+        .right-container {
+            width: 100%; /* Restaurar el tamaño grande */
+            background-color: #fff8dc;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .phrase-of-the-day h3,
+        .add-income h3 {
+            text-align: center; /* Centrar los títulos dentro de los contenedores */
+        }
+
+        .phrase-of-the-day p {
+            text-align: center; /* Centrar el texto de la frase del día */
+            font-style: italic;
+            color: #555;
+        }
+
+        .custom-file-upload .upload-button {
+            display: inline-block;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            color: white !important; /* Forzar el color blanco */
+            background-color: #A67B5B;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .custom-file-upload .upload-button:hover {
+            background-color: #8B5E3C;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Bienvenido a Oasis Spa</h1>
+            <h2>Sistema de gestión y control de ingresos</h2>
+            <nav>
+                <ul>
+                    <li><a href="index.html" class="active">Inicio</a></li> <!-- Enlace fijo para Inicio -->
+                    <li><a href="consultar-ingresos.html">Consultar Ingresos</a></li>
+                    <li><a href="citas.html">Citas</a></li>
+                    <li><a href="estadisticas.html">Estadísticas</a></li>
+                    <li><a href="generar-reportes.html">Generar Reportes</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <!-- Contenedor izquierdo -->
+            <div class="left-container">
+                <div class="phrase-of-the-day">
+                    <h3>Frase del día</h3>
+                    <p id="dailyPhrase">"La belleza comienza en el momento en que decides ser tú mismo." - Coco Chanel</p>
+                </div>
+            </div>
+
+            <!-- Contenedor derecho -->
+            <div class="right-container">
+                <div class="add-income">
+                    <h3>Añadir Ingreso</h3>
+                    <form id="form-ingreso">
+                        <label for="nombre">Nombre del cliente:</label>
+                        <input type="text" id="nombre" name="nombre" required />
+
+                        <label for="monto">Monto:</label>
+                        <input type="number" id="monto" name="monto" step="0.01" required />
+
+                        <label for="realizado">Fecha:</label>
+                        <input type="date" id="realizado" name="realizado" required />
+
+                        <label for="quien">Realizado por:</label>
+                        <input type="text" id="quien" name="quien" required />
+
+                        <label for="seRealizo">¿Se realizó?</label>
+                        <input type="text" id="seRealizo" name="seRealizo" required />
+
+                        <button type="submit">Registrar ingreso</button>
+                    </form>
+
+                    <div id="mensaje"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer style="text-align: center; padding: 10px; background-color: #fff8dc; margin-top: 20px;">
+        <p>&copy; 2025 Oasis Spa. Todos los derechos reservados.</p>
+    </footer>
+    <script src="./scripts.js" defer></script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('form-ingreso');
+            const mensaje = document.getElementById('mensaje');
+            const submitButton = form.querySelector('button[type="submit"]');
+
+            // Variable para evitar múltiples envíos
+            let isSubmitting = false;
+
+            // Asegúrate de que el evento se registre solo una vez
+            if (!form.dataset.listenerAdded) {
+                form.dataset.listenerAdded = true; // Marca que el evento ya fue registrado
+
+                form.addEventListener('submit', async (event) => {
+                    event.preventDefault(); // Evitar el comportamiento predeterminado del formulario
+
+                    // Evitar múltiples envíos
+                    if (isSubmitting) return;
+                    isSubmitting = true;
+                    submitButton.disabled = true; // Deshabilitar el botón de envío
+
+                    const formData = new FormData(form);
+
+                    try {
+                        const response = await fetch('/api/ingresos', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            mensaje.textContent = result.message || 'Ingreso registrado correctamente';
+                            mensaje.style.color = 'green';
+                            form.reset(); // Limpiar el formulario después de un envío exitoso
+                        } else {
+                            const error = await response.json();
+                            mensaje.textContent = error.error || 'Error al registrar el ingreso';
+                            mensaje.style.color = 'red';
+                        }
+                    } catch (error) {
+                        mensaje.textContent = 'Error de conexión con el servidor';
+                        mensaje.style.color = 'red';
+                    } finally {
+                        isSubmitting = false; // Permitir nuevos envíos después de completar
+                        submitButton.disabled = false; // Habilitar el botón de envío
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

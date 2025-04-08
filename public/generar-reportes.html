@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>Generar Reportes - Oasis Spa</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script> <!-- Librería para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script> <!-- Plugin para tablas en PDF -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5deb3;
+        }
+
+        .header-container {
+            background-color: #fff8dc;
+            color: #333;
+            padding: 45px 12px;
+            text-align: center;
+            border-radius: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #A67B5B;
+            transform: scale(1.1);
+        }
+
+        nav ul li a.active {
+            color: #A67B5B;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .floating-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-pdf {
+            display: block;
+            margin: 0 auto;
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #A67B5B, #8B5E3C);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-pdf:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Encabezado con contenedor flotante -->
+    <div class="header-container">
+        <h1>Generar Reportes</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="consultar-ingresos.html">Consultar Ingresos</a></li>
+                <li><a href="citas.html">Citas</a></li>
+                <li><a href="estadisticas.html">Estadísticas</a></li>
+                <li><a href="generar-reportes.html" class="active">Generar Reportes</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <main class="container">
+        <!-- Botón de generar reporte actualizado -->
+        <button class="btn-pdf" onclick="generarPDF()">Generar Reporte Mensual</button>
+    </main>
+
+    <footer style="text-align: center; padding: 10px; background-color: #fff8dc; margin-top: 20px;">
+        <p>&copy; 2025 Oasis Spa. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        async function generarPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+
+            try {
+                const response = await fetch('/api/ingresos'); // Ruta para obtener los ingresos
+                if (!response.ok) {
+                    throw new Error('Error al obtener los ingresos.');
+                }
+
+                const ingresos = await response.json();
+
+                if (!ingresos || ingresos.length === 0) {
+                    alert('No hay datos disponibles para generar el reporte.');
+                    return;
+                }
+
+                // Fecha y hora actual
+                const fecha = new Date();
+                const fechaFormateada = fecha.toLocaleDateString();
+                const horaFormateada = fecha.toLocaleTimeString();
+
+                // Obtener el mes actual en texto
+                const meses = [
+                    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                ];
+                const mesActual = meses[fecha.getMonth()];
+
+                // Título del reporte
+                pdf.setFontSize(18);
+                pdf.text(`Reporte Mensual de Ingresos - ${mesActual}`, 105, 20, { align: "center" });
+                pdf.setFontSize(12);
+                pdf.text(`Fecha: ${fechaFormateada} - Hora: ${horaFormateada}`, 105, 30, { align: "center" });
+
+                // Crear tabla de ingresos
+                const ingresosTabla = ingresos.map((ingreso) => [
+                    ingreso.nombre || 'Sin nombre',
+                    ingreso.realizado || 'Sin fecha',
+                    `$${parseFloat(ingreso.monto).toFixed(2)}`,
+                    ingreso.seRealizo || 'Sin información', // Mostrar lo que se realizó
+                    ingreso.quien || 'Desconocido',
+                ]);
+
+                pdf.autoTable({
+                    head: [['Nombre del Cliente', 'Fecha', 'Monto', '¿Qué se Realizó?', '¿Quién lo Realizó?']],
+                    body: ingresosTabla,
+                    startY: 40,
+                    theme: 'grid',
+                    headStyles: { fillColor: [166, 123, 91] },
+                    styles: { font: 'helvetica', fontSize: 12, cellPadding: 5 },
+                });
+
+                // Calcular total mensual
+                const totalMensual = ingresos.reduce((acc, ingreso) => acc + parseFloat(ingreso.monto), 0);
+
+                // Mostrar total mensual centrado
+                pdf.setFontSize(16);
+                pdf.setFont("helvetica", "bold");
+                pdf.text(`Total del mes: $${totalMensual.toFixed(2)}`, 105, pdf.lastAutoTable.finalY + 20, { align: "center" });
+
+                pdf.save(`reporte_mensual_${mesActual}.pdf`);
+            } catch (error) {
+                console.error('Error al generar el reporte:', error);
+                alert('Error al generar el reporte. Inténtalo más tarde.');
+            }
+        }
+    </script>
+</body>
+</html>
