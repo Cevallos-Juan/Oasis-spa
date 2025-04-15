@@ -7,3 +7,13 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DB_HOST
+        value: dpg-cvumh5umcj7s73ch9dtg-a
+      - key: DB_PORT
+        value: 5432
+      - key: DB_NAME
+        value: oasis_spa
+      - key: DB_USER
+        value: oasis_spa_user
+      - key: DB_PASSWORD
+        value: JSZfruFE7u6MW7Lc4wDsAqQdSgZQzFRk

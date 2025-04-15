@@ -309,7 +309,7 @@
                         <input type="text" id="nombre" name="nombre" value="${ingreso.nombre}" required>
                         
                         <label for="monto">Monto:</label>
-                        <input type="number" id="monto" name="monto" step="any" required />
+                        <input type="number" id="monto" name="monto" value="${ingreso.monto}" step="any" required>
                         
                         <label for="realizado">Fecha:</label>
                         <input type="date" id="realizado" name="realizado" value="${ingreso.realizado}" required>
@@ -375,12 +375,25 @@
 
         // Función para eliminar un ingreso
         async function eliminarIngreso(id) {
-            const confirmacionHTML = `
-                <p>¿Estás seguro de que deseas eliminar este ingreso?</p>
-                <button onclick="confirmarEliminar(${id})">Sí, eliminar</button>
-                <button onclick="cerrarModal()">Cancelar</button>
-            `;
-            mostrarModal(confirmacionHTML);
+            if (confirm('¿Estás seguro de que deseas eliminar este ingreso?')) {
+                try {
+                    const response = await fetch(`/api/ingresos/${id}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) {
+                        alert('Ingreso eliminado correctamente.');
+                        // Elimina el ingreso de la tabla sin recargar
+                        document.getElementById(`ingreso-${id}`).remove();
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.error}`);
+                    }
+                } catch (err) {
+                    console.error('Error al eliminar el ingreso:', err);
+                    alert('Ocurrió un error al intentar eliminar el ingreso.');
+                }
+            }
         }
 
         async function confirmarEliminar(id) {
@@ -425,10 +438,11 @@
                 const ingresos = await response.json();
 
                 if (ingresos.length === 0) {
-                    resultadosTabla.innerHTML = '<tr><td colspan="6">No se encontraron resultados.</td></tr>';
+                    resultadosTabla.innerHTML = '<tr><td colspan="7">No se encontraron resultados.</td></tr>';
                 } else {
                     ingresos.forEach((ingreso) => {
                         const fila = document.createElement('tr');
+                        fila.id = `ingreso-${ingreso.id}`;
                         fila.innerHTML = `
                             <td>${ingreso.nombre}</td>
                             <td>$${parseFloat(ingreso.monto).toFixed(2)}</td>
@@ -446,9 +460,20 @@
                 }
             } catch (error) {
                 console.error('Error al cargar los ingresos:', error);
-                resultadosTabla.innerHTML = '<tr><td colspan="6">Error al cargar los datos.</td></tr>';
+                resultadosTabla.innerHTML = '<tr><td colspan="7">Error al cargar los datos.</td></tr>';
             }
         }
+
+        // Asociar el evento al botón de búsqueda
+        document.getElementById('searchButton').addEventListener('click', (event) => {
+            event.preventDefault(); // Evitar que el botón recargue la página
+            buscar(); // Llamar a la función buscar
+        });
+
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarIngresos(); // Cargar todos los ingresos al inicio
+        });
 
         // Función para actualizar los registros diarios
         async function actualizarRegistrosDiarios() {

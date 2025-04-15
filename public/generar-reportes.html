@@ -133,15 +133,17 @@
 
                 const ingresos = await response.json();
 
+                // Verifica los datos recibidos
+                console.log('Datos recibidos desde la API:', ingresos);
+
                 if (!ingresos || ingresos.length === 0) {
                     alert('No hay datos disponibles para generar el reporte.');
                     return;
                 }
 
-                // Fecha y hora actual
+                // Fecha actual
                 const fecha = new Date();
                 const fechaFormateada = fecha.toLocaleDateString();
-                const horaFormateada = fecha.toLocaleTimeString();
 
                 // Obtener el mes actual en texto
                 const meses = [
@@ -154,12 +156,12 @@
                 pdf.setFontSize(18);
                 pdf.text(`Reporte Mensual de Ingresos - ${mesActual}`, 105, 20, { align: "center" });
                 pdf.setFontSize(12);
-                pdf.text(`Fecha: ${fechaFormateada} - Hora: ${horaFormateada}`, 105, 30, { align: "center" });
+                pdf.text(`${fechaFormateada}`, 105, 30, { align: "center" }); // Solo muestra la fecha
 
                 // Crear tabla de ingresos
                 const ingresosTabla = ingresos.map((ingreso) => [
                     ingreso.nombre || 'Sin nombre',
-                    ingreso.realizado || 'Sin fecha',
+                    new Date(ingreso.realizado).toLocaleDateString() || 'Sin fecha', // Formatear la fecha
                     `$${parseFloat(ingreso.monto).toFixed(2)}`,
                     ingreso.seRealizo || 'Sin información', // Mostrar lo que se realizó
                     ingreso.quien || 'Desconocido',

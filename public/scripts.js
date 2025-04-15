@@ -115,22 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ingresos.length === 0) {
                 resultadosTabla.innerHTML = '<tr><td colspan="8">No se encontraron resultados.</td></tr>';
             } else {
-                ingresos.forEach((ingreso) => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${ingreso.nombre}</td>
-                        <td>$${parseFloat(ingreso.monto).toFixed(2)}</td>
-                        <td>${ingreso.realizado}</td>
-                        <td>${ingreso.quien}</td>
-                        <td>${ingreso.seRealizo}</td>
-                        <td>$${(ingreso.monto * 0.4).toFixed(2)}</td>
-                        <td>
-                            <button onclick="editarIngreso(${ingreso.id})">Editar</button>
-                            <button onclick="eliminarIngreso(${ingreso.id})">Eliminar</button>
-                        </td>
-                    `;
-                    resultadosTabla.appendChild(fila);
-                });
+                renderIngresos(ingresos);
             }
         } catch (error) {
             console.error('Error al cargar los ingresos:', error);
@@ -340,6 +325,15 @@ document.getElementById('filterForm').addEventListener('submit', (event) => {
     cargarIngresos({ fechaInicio, fechaFin });
 });
 
+document.getElementById('filterForm').addEventListener('submit', (event) => {
+    event.preventDefault(); // Evitar el comportamiento predeterminado del formulario
+
+    const nombre = document.getElementById('searchInput').value.trim(); // Obtener el valor del campo de búsqueda
+    cargarIngresos({ nombre }); // Llamar a la función cargarIngresos con el filtro de nombre
+});
+
+document.getElementById('searchButton').addEventListener('click', buscar);
+
 async function inicializarEstadisticas() {
     let graficoSemanal;
 
@@ -439,25 +433,350 @@ async function cargarIngresos() {
         if (ingresos.length === 0) {
             resultadosTabla.innerHTML = '<tr><td colspan="8">No se encontraron resultados.</td></tr>';
         } else {
-            ingresos.forEach((ingreso) => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td>${ingreso.nombre}</td>
-                    <td>$${parseFloat(ingreso.monto).toFixed(2)}</td>
-                    <td>${ingreso.realizado}</td>
-                    <td>${ingreso.quien}</td>
-                    <td>${ingreso.seRealizo}</td>
-                    <td>$${(ingreso.monto * 0.4).toFixed(2)}</td>
-                    <td>
-                        <button onclick="editarIngreso(${ingreso.id})">Editar</button>
-                        <button onclick="eliminarIngreso(${ingreso.id})">Eliminar</button>
-                    </td>
-                `;
-                resultadosTabla.appendChild(fila);
-            });
+            renderIngresos(ingresos);
         }
     } catch (error) {
         console.error('Error al cargar los ingresos:', error);
         resultadosTabla.innerHTML = '<tr><td colspan="8">Error al cargar los datos.</td></tr>';
+    }
+}
+
+// Función para cargar citas en la tabla
+async function cargarCitas() {
+    const tablaCitas = document.getElementById('tablaCitas');
+    tablaCitas.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+
+    try {
+        const response = await fetch('/api/citas');
+        if (!response.ok) throw new Error('Error al cargar las citas.');
+
+        const citas = await response.json();
+
+        // Validar que `citas` sea un array
+        if (!Array.isArray(citas)) {
+            throw new Error('El formato de los datos recibidos no es válido.');
+        }
+
+        if (citas.length === 0) {
+            tablaCitas.innerHTML = '<tr><td colspan="6">No hay citas programadas.</td></tr>';
+        } else {
+            citas.forEach((cita) => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${cita.nombre || 'Sin nombre'}</td>
+                    <td>${cita.fecha || 'Sin fecha'}</td>
+                    <td>${cita.hora || 'Sin hora'}</td>
+                    <td>${cita.servicio || 'Sin servicio'}</td>
+                    <td>${cita.estado || 'Pendiente'}</td>
+                    <td>
+                        <button onclick="editarCita(${cita.id})">Editar</button>
+                        <button onclick="eliminarCita(${cita.id})">Eliminar</button>
+                    </td>
+                `;
+                tablaCitas.appendChild(fila);
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar las citas:', error);
+        tablaCitas.innerHTML = '<tr><td colspan="6">Error al cargar las citas.</td></tr>';
+    }
+}
+
+// Función para manejar el envío del formulario de citas
+document.getElementById('addCitaForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const body = {
+        nombre: document.getElementById('nombreCliente').value,
+        servicio: document.getElementById('servicio').value,
+        fecha: document.getElementById('fechaCita').value,
+        hora: document.getElementById('horaCita').value,
+    };
+
+    try {
+        const response = await fetch('/api/citas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+
+        if (response.ok) {
+            mostrarMensajeFlotante('Cita añadida correctamente');
+            document.getElementById('addCitaForm').reset(); // Limpiar el formulario
+            cargarCitas(); // Recargar la tabla de citas
+        } else {
+            const error = await response.json();
+            mostrarMensajeFlotante(`Error al añadir la cita: ${error.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error al añadir la cita:', error);
+        mostrarMensajeFlotante('Error al conectar con el servidor', 'error');
+    }
+});
+
+// Cargar las citas al cargar la página
+document.addEventListener('DOMContentLoaded', cargarCitas);
+
+function renderIngresos(ingresos) {
+    const tbody = document.getElementById('resultadosTabla');
+    tbody.innerHTML = '';
+
+    ingresos.forEach(ingreso => {
+        console.log('Ingreso recibido:', ingreso); // Depuración
+
+        const row = document.createElement('tr');
+
+        // Formatea la fecha
+        const fechaFormateada = ingreso.realizado.split('T')[0];
+
+        // Usa el nombre correcto del campo
+        const seRealizo = ingreso.serealizo || 'No especificado';
+
+        row.innerHTML = `
+            <tr id="ingreso-${ingreso.id}">
+                <td>${ingreso.nombre}</td>
+                <td>$${ingreso.monto}</td>
+                <td>${fechaFormateada}</td>
+                <td>${ingreso.quien}</td>
+                <td>${seRealizo}</td>
+                <td>${(ingreso.monto * 0.4).toFixed(2)}</td>
+                <td>
+                    <button class="btn-editar" onclick="editarIngreso(${ingreso.id})">Editar</button>
+                    <button class="btn-eliminar" onclick="eliminarIngreso(${ingreso.id})">Eliminar</button>
+                </td>
+            </tr>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+async function editarIngreso(id) {
+    try {
+        const response = await fetch(`/api/ingresos/${id}`);
+        if (!response.ok) throw new Error('Error al obtener los datos del ingreso.');
+        const ingreso = await response.json();
+
+        const formularioHTML = `
+            <h3>Editar Ingreso</h3>
+            <form id="editarIngresoForm">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" value="${ingreso.nombre}" required>
+                
+                <label for="monto">Monto:</label>
+                <input type="number" id="monto" name="monto" step="any" value="${ingreso.monto}" required>
+                
+                <label for="realizado">Fecha:</label>
+                <input type="date" id="realizado" name="realizado" value="${ingreso.realizado.split('T')[0]}" required>
+                
+                <label for="quien">Lo Realizó:</label>
+                <input type="text" id="quien" name="quien" value="${ingreso.quien}" required>
+                
+                <label for="seRealizo">¿Se realizó?</label>
+                <input type="text" id="seRealizo" name="seRealizo" value="${ingreso.seRealizo}" required>
+                
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" onclick="cerrarModal()">Cancelar</button>
+            </form>
+        `;
+
+        mostrarModal(formularioHTML);
+
+        const editarIngresoForm = document.getElementById('editarIngresoForm');
+        editarIngresoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nuevoNombre = document.getElementById('nombre').value.trim();
+            const nuevoMonto = parseFloat(document.getElementById('monto').value);
+            const nuevaFecha = document.getElementById('realizado').value;
+            const nuevoQuien = document.getElementById('quien').value.trim();
+            const nuevoSeRealizo = document.getElementById('seRealizo').value.trim();
+
+            try {
+                const response = await fetch(`/api/ingresos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: nuevoNombre,
+                        monto: nuevoMonto,
+                        realizado: nuevaFecha,
+                        quien: nuevoQuien,
+                        seRealizo: nuevoSeRealizo
+                    })
+                });
+
+                if (response.ok) {
+                    mostrarModal('<p>Ingreso editado correctamente.</p><button onclick="cerrarModal()">Cerrar</button>');
+                    cargarIngresos(); // Recargar la tabla
+                } else {
+                    const error = await response.json();
+                    mostrarModal(`<p>Error al editar el ingreso: ${error.error}</p><button onclick="cerrarModal()">Cerrar</button>`);
+                }
+            } catch (error) {
+                console.error('Error al editar el ingreso:', error);
+                mostrarModal('<p>Error al editar el ingreso.</p><button onclick="cerrarModal()">Cerrar</button>');
+            }
+        });
+    } catch (error) {
+        console.error('Error al cargar los datos del ingreso:', error);
+        mostrarModal('<p>Error al cargar los datos del ingreso.</p><button onclick="cerrarModal()">Cerrar</button>');
+    }
+}
+
+async function eliminarIngreso(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar este ingreso?')) {
+        try {
+            const response = await fetch(`/api/ingresos/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('Ingreso eliminado correctamente.');
+                // Elimina el ingreso de la tabla sin recargar
+                const fila = document.getElementById(`ingreso-${id}`);
+                if (fila) {
+                    fila.remove();
+                }
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (err) {
+            console.error('Error al eliminar el ingreso:', err);
+            alert('Ocurrió un error al intentar eliminar el ingreso.');
+        }
+    }
+}
+
+async function editarCita(id) {
+    try {
+        const response = await fetch(`/api/citas/${id}`);
+        if (!response.ok) throw new Error('Error al obtener los datos de la cita.');
+        const cita = await response.json();
+
+        const formularioHTML = `
+            <h3>Editar Cita</h3>
+            <form id="editarCitaForm">
+                <label for="nombre">Nombre del Cliente:</label>
+                <input type="text" id="nombre" name="nombre" value="${cita.nombre}" required>
+
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" value="${cita.fecha}" required>
+
+                <label for="hora">Hora:</label>
+                <input type="time" id="hora" name="hora" value="${cita.hora}" required>
+
+                <label for="servicio">Servicio:</label>
+                <input type="text" id="servicio" name="servicio" value="${cita.servicio}" required>
+
+                <label for="estado">Estado:</label>
+                <select id="estado" name="estado" class="custom-select">
+                    <option value="Pendiente" ${cita.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="Asistió" ${cita.estado === 'Asistió' ? 'selected' : ''}>Asistió</option>
+                    <option value="No asistió" ${cita.estado === 'No asistió' ? 'selected' : ''}>No asistió</option>
+                </select>
+
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" onclick="cerrarModal()">Cancelar</button>
+            </form>
+        `;
+
+        mostrarModal(formularioHTML);
+
+        const editarCitaForm = document.getElementById('editarCitaForm');
+        editarCitaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const body = {
+                nombre: document.getElementById('nombre').value,
+                fecha: document.getElementById('fecha').value,
+                hora: document.getElementById('hora').value,
+                servicio: document.getElementById('servicio').value,
+                estado: document.getElementById('estado').value,
+            };
+
+            try {
+                const response = await fetch(`/api/citas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                if (response.ok) {
+                    mostrarMensajeFlotante('Cita editada correctamente');
+                    cerrarModal(); // Cerrar el modal después de guardar
+                    cargarCitas(); // Recargar la tabla
+                } else {
+                    const error = await response.json();
+                    mostrarModal(`<p>Error al editar la cita: ${error.error}</p><button onclick="cerrarModal()">Cerrar</button>`);
+                }
+            } catch (error) {
+                console.error('Error al editar la cita:', error);
+                mostrarModal('<p>Error al editar la cita.</p><button onclick="cerrarModal()">Cerrar</button>');
+            }
+        });
+    } catch (error) {
+        console.error('Error al cargar los datos de la cita:', error);
+        mostrarModal('<p>Error al cargar los datos de la cita.</p><button onclick="cerrarModal()">Cerrar</button>');
+    }
+}
+
+// Función para eliminar una cita
+async function eliminarCita(id) {
+    const confirmacionHTML = `
+        <h3>Confirmar Eliminación</h3>
+        <p>¿Estás seguro de que deseas eliminar esta cita?</p>
+        <button onclick="confirmarEliminar(${id})">Sí, eliminar</button>
+        <button onclick="cerrarModal()">Cancelar</button>
+    `;
+    mostrarModal(confirmacionHTML);
+}
+
+async function confirmarEliminar(id) {
+    try {
+        const response = await fetch(`/api/citas/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            mostrarMensajeFlotante('Cita eliminada correctamente');
+            cerrarModal(); // Cerrar el modal después de eliminar
+            cargarCitas(); // Recargar la tabla
+        } else {
+            mostrarModal('<p>Error al eliminar la cita.</p><button onclick="cerrarModal()">Cerrar</button>');
+        }
+    } catch (error) {
+        console.error('Error al eliminar la cita:', error);
+        mostrarModal('<p>Error al eliminar la cita.</p><button onclick="cerrarModal()">Cerrar</button>');
+    }
+}
+
+function mostrarModal(contenido) {
+    const modal = document.createElement('div');
+    modal.id = 'modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '1000';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.backgroundColor = '#fff';
+    modalContent.style.padding = '20px';
+    modalContent.style.borderRadius = '8px';
+    modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+    modalContent.style.width = '50%'; // Cambiar el ancho del modal
+    modalContent.style.maxWidth = '600px'; // Ancho máximo
+    modalContent.innerHTML = contenido;
+
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.remove();
     }
 }

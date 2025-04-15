@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -65,163 +67,118 @@ function validarCita({ nombre, servicio, fecha, hora }) {
 
 // Endpoints de la API
 
+// Cambios en las consultas SQL
+
 // **1. Registrar un ingreso**
 app.post('/api/ingresos', (req, res) => {
-    upload(req, res, (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).json({ error: `Error de carga: ${err.message}` });
-        } else if (err) {
-            return res.status(500).json({ error: 'Error interno del servidor' });
+    upload(req, res, async (err) => {
+        if (err) {
+            console.error('Error al subir archivos:', err.message);
+            return res.status(500).json({ error: 'Error al subir archivos.' });
         }
 
+        const { nombre, monto, realizado, quien, seRealizo } = req.body;
+        const fotosPaths = req.files ? req.files.map(file => file.filename) : [];
+
+        console.log('Datos recibidos:', { nombre, monto, realizado, quien, seRealizo, fotosPaths });
+
+        const query = `
+            INSERT INTO ingresos (nombre, monto, realizado, quien, seRealizo, fotos)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id;
+        `;
+        const params = [nombre, monto, realizado, quien, seRealizo, JSON.stringify(fotosPaths)];
+
         try {
-            const { nombre, monto, realizado, quien, seRealizo } = req.body;
-            const fotos = req.files;
-
-            // Validar los datos
-            const error = validarIngreso({ nombre, monto, realizado, quien, seRealizo });
-            if (error) {
-                return res.status(400).json({ error });
-            }
-
-            // Convertir las rutas de las fotos a un formato JSON para almacenarlas en la base de datos
-            const fotosPaths = fotos.map((file) => file.path);
-
-            // Log para depuración
-            console.log('Datos recibidos:', { nombre, monto, realizado, quien, seRealizo, fotosPaths });
-
-            // Insertar los datos en la base de datos
-            const query = `
-                INSERT INTO ingresos (nombre, monto, realizado, quien, seRealizo, fotos)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `;
-            const params = [nombre, monto, realizado, quien, seRealizo, JSON.stringify(fotosPaths)];
-
-            db.run(query, params, function (err) {
-                if (err) {
-                    console.error('Error al insertar el ingreso en la base de datos:', err.message);
-                    return res.status(500).json({ error: 'Error al guardar el ingreso en la base de datos.' });
-                }
-
-                // Log para depuración
-                console.log('Ingreso registrado con ID:', this.lastID);
-
-                // Respuesta exitosa
-                res.status(201).json({
-                    message: 'Ingreso registrado exitosamente.',
-                    id: this.lastID,
-                });
+            const result = await db.query(query, params);
+            res.status(201).json({
+                message: 'Ingreso registrado exitosamente.',
+                id: result.rows[0].id,
             });
         } catch (error) {
-            console.error('Error al procesar la solicitud:', error);
-            res.status(500).json({ error: 'Error interno del servidor.' });
+            console.error('Error al insertar el ingreso en la base de datos:', error.message);
+            res.status(500).json({ error: 'Error al guardar el ingreso en la base de datos.' });
         }
     });
 });
 
 // **2. Obtener todos los ingresos**
-app.get('/api/ingresos', (req, res) => {
-    const { nombre, fechaInicio, fechaFin } = req.query;
+app.get('/api/ingresos', async (req, res) => {
+    const { nombre } = req.query;
 
-    let query = 'SELECT * FROM ingresos WHERE 1=1';
-    const params = [];
+    try {
+        let query = 'SELECT * FROM ingresos';
+        const params = [];
 
-    if (nombre) {
-        query += ' AND nombre LIKE ?';
-        params.push(`%${nombre}%`);
-    }
-
-    if (fechaInicio) {
-        query += ' AND realizado >= ?';
-        params.push(fechaInicio);
-    }
-
-    if (fechaFin) {
-        query += ' AND realizado <= ?';
-        params.push(fechaFin);
-    }
-
-    db.all(query, params, (err, rows) => {
-        if (err) {
-            console.error('Error al obtener los ingresos:', err.message);
-            return res.status(500).json({ error: 'Error al obtener los ingresos.' });
+        if (nombre) {
+            query += ' WHERE LOWER(nombre) LIKE LOWER($1)';
+            params.push(`%${nombre}%`);
         }
 
-        res.status(200).json(rows);
-    });
+        const result = await db.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error al obtener los ingresos:', err.message);
+        res.status(500).json({ error: 'Error al obtener los ingresos.' });
+    }
 });
 
 // **3. Obtener un ingreso por ID**
-app.get('/api/ingresos/:id', (req, res) => {
+app.get('/api/ingresos/:id', async (req, res) => {
     const { id } = req.params;
 
-    const query = 'SELECT * FROM ingresos WHERE id = ?';
-    db.get(query, [id], (err, row) => {
-        if (err) {
-            console.error('Error al obtener el ingreso:', err.message);
-            return res.status(500).json({ error: 'Error al obtener el ingreso.' });
-        }
-
-        if (!row) {
+    try {
+        const result = await db.query('SELECT * FROM ingresos WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Ingreso no encontrado.' });
         }
-
-        res.status(200).json(row);
-    });
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error al obtener el ingreso:', err.message);
+        res.status(500).json({ error: 'Error al obtener el ingreso.' });
+    }
 });
 
 // **4. Editar un ingreso**
-app.put('/api/ingresos/:id', (req, res) => {
+app.put('/api/ingresos/:id', async (req, res) => {
     const { id } = req.params;
     const { nombre, monto, realizado, quien, seRealizo } = req.body;
 
-    const error = validarIngreso({ nombre, monto, realizado, quien, seRealizo });
-    if (error) {
-        return res.status(400).json({ error });
-    }
-
-    const query = `
-        UPDATE ingresos
-        SET nombre = ?, monto = ?, realizado = ?, quien = ?, seRealizo = ?
-        WHERE id = ?
-    `;
-    const params = [nombre, monto, realizado, quien, seRealizo, id];
-
-    db.run(query, params, function (err) {
-        if (err) {
-            console.error('Error al actualizar ingreso:', err.message);
-            return res.status(500).json({ error: 'Error al actualizar el ingreso.' });
-        }
-
-        if (this.changes === 0) {
-            return res.status(404).json({ error: 'Ingreso no encontrado.' });
-        }
-
+    try {
+        const query = `
+            UPDATE ingresos
+            SET nombre = $1, monto = $2, realizado = $3, quien = $4, seRealizo = $5
+            WHERE id = $6
+        `;
+        await db.query(query, [nombre, monto, realizado, quien, seRealizo, id]);
         res.json({ message: 'Ingreso actualizado correctamente.' });
-    });
+    } catch (err) {
+        console.error('Error al actualizar el ingreso:', err.message);
+        res.status(500).json({ error: 'Error al actualizar el ingreso.' });
+    }
 });
 
 // **5. Eliminar un ingreso**
-app.delete('/api/ingresos/:id', (req, res) => {
+app.delete('/api/ingresos/:id', async (req, res) => {
     const { id } = req.params;
 
-    const query = `DELETE FROM ingresos WHERE id = ?`;
-    db.run(query, [id], function (err) {
-        if (err) {
-            console.error('Error al eliminar el ingreso:', err.message);
-            return res.status(500).json({ error: 'Error al eliminar el ingreso.' });
-        }
+    try {
+        const query = 'DELETE FROM ingresos WHERE id = $1';
+        const result = await db.query(query, [id]);
 
-        if (this.changes === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Ingreso no encontrado.' });
         }
 
         res.json({ message: 'Ingreso eliminado correctamente.' });
-    });
+    } catch (err) {
+        console.error('Error al eliminar el ingreso:', err.message);
+        res.status(500).json({ error: 'Error al eliminar el ingreso.' });
+    }
 });
 
 // **6. Registrar una cita**
-app.post('/api/citas', (req, res) => {
+app.post('/api/citas', async (req, res) => {
     const { nombre, servicio, fecha, hora } = req.body;
 
     const error = validarCita({ nombre, servicio, fecha, hora });
@@ -229,48 +186,50 @@ app.post('/api/citas', (req, res) => {
         return res.status(400).json({ error });
     }
 
-    db.run(
-        `INSERT INTO citas (nombre, servicio, fecha, hora) VALUES (?, ?, ?, ?)`,
-        [nombre, servicio, fecha, hora],
-        function (err) {
-            if (err) {
-                console.error('Error al registrar la cita:', err.message);
-                return res.status(500).json({ error: 'Error al registrar la cita.' });
-            }
+    const query = `
+        INSERT INTO citas (nombre, servicio, fecha, hora)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id;
+    `;
+    const params = [nombre, servicio, fecha, hora];
 
-            res.status(201).json({ message: 'Cita registrada correctamente.', id: this.lastID });
-        }
-    );
+    try {
+        const result = await db.query(query, params);
+        res.status(201).json({ message: 'Cita registrada correctamente.', id: result.rows[0].id });
+    } catch (err) {
+        console.error('Error al registrar la cita:', err.message);
+        res.status(500).json({ error: 'Error al registrar la cita.' });
+    }
 });
 
 // **7. Obtener todas las citas**
-app.get('/api/citas', (req, res) => {
-    db.all('SELECT * FROM citas ORDER BY fecha, hora', [], (err, rows) => {
-        if (err) {
-            console.error('Error al obtener las citas:', err.message);
-            return res.status(500).json({ error: 'Error al obtener las citas.' });
-        }
-
-        res.status(200).json(rows);
-    });
+app.get('/api/citas', async (req, res) => {
+    try {
+        const query = 'SELECT id, nombre, servicio, fecha, hora, estado FROM citas';
+        const result = await db.query(query);
+        res.json(result.rows); // Devolver las citas al frontend
+    } catch (err) {
+        console.error('Error al obtener las citas:', err.message);
+        res.status(500).json({ error: 'Error al obtener las citas.' });
+    }
 });
 
 // **Endpoint para obtener estadísticas semanales**
 app.get('/api/estadisticas', (req, res) => {
     const query = `
-        SELECT strftime('%w', realizado) AS dia, SUM(monto) AS total
+        SELECT EXTRACT(DOW FROM realizado) AS dia, SUM(monto) AS total
         FROM ingresos
         GROUP BY dia
         ORDER BY dia;
     `;
 
-    db.all(query, [], (err, rows) => {
+    db.query(query, [], (err, rows) => {
         if (err) {
             console.error('Error al obtener las estadísticas:', err.message);
             return res.status(500).json({ error: 'Error al obtener las estadísticas.' });
         }
 
-        res.status(200).json({ porDia: rows });
+        res.status(200).json({ porDia: rows.rows });
     });
 });
 
@@ -304,3 +263,70 @@ function verImagen(rutaFoto) {
     `;
     document.body.appendChild(modal);
 }
+
+app.get('/consultar-ingresos', (req, res) => {
+    const query = 'SELECT * FROM ingresos';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al consultar los ingresos:', err.message);
+            return res.status(500).json({ error: 'Error al consultar los ingresos.' });
+        }
+        res.json(results);
+    });
+});
+
+app.delete('/api/citas/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = 'DELETE FROM citas WHERE id = $1';
+        const result = await db.query(query, [id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Cita no encontrada.' });
+        }
+
+        res.json({ message: 'Cita eliminada correctamente.' });
+    } catch (err) {
+        console.error('Error al eliminar la cita:', err.message);
+        res.status(500).json({ error: 'Error al eliminar la cita.' });
+    }
+});
+
+app.put('/api/citas/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nombre, servicio, fecha, hora, estado } = req.body;
+
+    try {
+        const query = `
+            UPDATE citas
+            SET nombre = $1, servicio = $2, fecha = $3, hora = $4, estado = $5
+            WHERE id = $6
+        `;
+        const params = [nombre, servicio, fecha, hora, estado, id];
+        await db.query(query, params);
+        res.json({ message: 'Cita actualizada correctamente.' });
+    } catch (err) {
+        console.error('Error al actualizar la cita:', err.message);
+        res.status(500).json({ error: 'Error al actualizar la cita.' });
+    }
+});
+
+// Obtener los datos de una cita específica
+app.get('/api/citas/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = 'SELECT id, nombre, servicio, fecha, hora, estado FROM citas WHERE id = $1';
+        const result = await db.query(query, [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Cita no encontrada.' });
+        }
+
+        res.json(result.rows[0]); // Devolver los datos de la cita
+    } catch (err) {
+        console.error('Error al obtener la cita:', err.message);
+        res.status(500).json({ error: 'Error al obtener la cita.' });
+    }
+});

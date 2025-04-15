@@ -268,7 +268,7 @@
                             </tr>
                         </thead>
                         <tbody id="tablaCitas">
-                            <!-- Las citas se cargarán dinámicamente aquí -->
+                            <!-- Las filas se insertarán aquí dinámicamente -->
                         </tbody>
                     </table>
                 </div>
@@ -313,15 +313,46 @@
 
         // Función para cargar citas
         async function cargarCitas() {
+            const tablaCitas = document.getElementById('tablaCitas');
+            tablaCitas.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
+
             try {
-                const response = await fetch('/api/citas'); // Ruta correcta
+                const response = await fetch('/api/citas'); // Llamar al backend para obtener las citas
                 if (!response.ok) throw new Error('Error al cargar las citas.');
+
                 const citas = await response.json();
 
-                // Procesar las citas y mostrarlas en la tabla
-                console.log(citas);
+                // Validar que `citas` sea un array
+                if (!Array.isArray(citas)) {
+                    throw new Error('El formato de los datos recibidos no es válido.');
+                }
+
+                if (citas.length === 0) {
+                    tablaCitas.innerHTML = '<tr><td colspan="6">No hay citas programadas.</td></tr>';
+                } else {
+                    citas.forEach((cita) => {
+                        // Formatear la fecha para mostrar solo la parte de la fecha
+                        const fechaFormateada = new Date(cita.fecha).toISOString().split('T')[0];
+
+                        const fila = document.createElement('tr');
+                        fila.setAttribute('data-id', cita.id); // Agregar un atributo para identificar la fila
+                        fila.innerHTML = `
+                            <td>${cita.nombre || 'Sin nombre'}</td>
+                            <td>${fechaFormateada || 'Sin fecha'}</td>
+                            <td>${cita.hora || 'Sin hora'}</td>
+                            <td>${cita.servicio || 'Sin servicio'}</td>
+                            <td>${cita.estado || 'Pendiente'}</td>
+                            <td>
+                                <button onclick="editarCita(${cita.id})">Editar</button>
+                                <button onclick="eliminarCita(${cita.id})">Eliminar</button>
+                            </td>
+                        `;
+                        tablaCitas.appendChild(fila);
+                    });
+                }
             } catch (error) {
                 console.error('Error al cargar las citas:', error);
+                tablaCitas.innerHTML = '<tr><td colspan="6">Error al cargar las citas.</td></tr>';
             }
         }
 

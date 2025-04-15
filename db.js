@@ -1,12 +1,14 @@
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 
-// Crear o abrir la base de datos
-const db = new sqlite3.Database('./newone_database.db', (err) => {
-    if (err) {
-        console.error('Error al conectar con la base de datos:', err.message);
-    } else {
-        console.log('Conectado a la base de datos SQLite.');
-    }
+console.log('Conectando a la base de datos con:', process.env.DATABASE_URL);
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }, // Para conexiones seguras
 });
 
-module.exports = db;
+module.exports = {
+    query: (text, params, callback) => {
+        return pool.query(text, params, callback);
+    },
+};
