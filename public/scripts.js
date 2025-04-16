@@ -646,6 +646,7 @@ async function editarIngreso(id) {
 
                 if (response.ok) {
                     mostrarModal('<p>Ingreso editado correctamente.</p><button onclick="cerrarModal()">Cerrar</button>');
+                    cerrarModal(); // Cerrar el modal de edición
                     cargarIngresos(); // Recargar la tabla
                 } else {
                     const error = await response.json();
@@ -663,27 +664,31 @@ async function editarIngreso(id) {
 }
 
 async function eliminarIngreso(id) {
-    if (confirm('¿Estás seguro de que deseas eliminar este ingreso?')) {
-        try {
-            const response = await fetch(`/api/ingresos/${id}`, {
-                method: 'DELETE',
-            });
+    // Crear el contenido del modal de confirmación
+    const confirmacionHTML = `
+        <h3>Confirmar Eliminación</h3>
+        <p>¿Estás seguro de que deseas eliminar este ingreso?</p>
+        <button onclick="confirmarEliminarIngreso(${id})" style="margin-right: 10px;">Sí, eliminar</button>
+        <button onclick="cerrarModal()">Cancelar</button>
+    `;
 
-            if (response.ok) {
-                alert('Ingreso eliminado correctamente.');
-                // Elimina el ingreso de la tabla sin recargar
-                const fila = document.getElementById(`ingreso-${id}`);
-                if (fila) {
-                    fila.remove();
-                }
-            } else {
-                const error = await response.json();
-                alert(`Error: ${error.error}`);
-            }
-        } catch (err) {
-            console.error('Error al eliminar el ingreso:', err);
-            alert('Ocurrió un error al intentar eliminar el ingreso.');
+    // Mostrar el modal con el contenido de confirmación
+    mostrarModal(confirmacionHTML);
+}
+
+async function confirmarEliminarIngreso(id) {
+    try {
+        const response = await fetch(`/api/ingresos/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            mostrarModal('<p>Ingreso eliminado correctamente.</p><button onclick="cerrarModal()">Cerrar</button>');
+            cargarIngresos(); // Recargar la tabla después de eliminar
+        } else {
+            const error = await response.json();
+            mostrarModal(`<p>Error al eliminar el ingreso: ${error.error || 'Error desconocido.'}</p><button onclick="cerrarModal()">Cerrar</button>`);
         }
+    } catch (error) {
+        console.error('Error al eliminar el ingreso:', error);
+        mostrarModal('<p>Error al eliminar el ingreso.</p><button onclick="cerrarModal()">Cerrar</button>');
     }
 }
 
@@ -788,6 +793,8 @@ async function confirmarEliminar(id) {
 }
 
 function mostrarModal(contenido) {
+    cerrarModal(); // Asegúrate de que no haya modales duplicados
+
     const modal = document.createElement('div');
     modal.id = 'modal';
     modal.style.position = 'fixed';
@@ -806,12 +813,15 @@ function mostrarModal(contenido) {
     modalContent.style.padding = '20px';
     modalContent.style.borderRadius = '8px';
     modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-    modalContent.style.width = '50%'; // Cambiar el ancho del modal
-    modalContent.style.maxWidth = '600px'; // Ancho máximo
+    modalContent.style.width = '50%';
+    modalContent.style.maxWidth = '600px';
+    modalContent.style.textAlign = 'center'; // Centrar el contenido del texto
     modalContent.innerHTML = contenido;
 
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
+
+    
 }
 
 function cerrarModal() {
