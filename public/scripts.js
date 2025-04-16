@@ -326,6 +326,111 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+document.addEventListener("DOMContentLoaded", async () => {
+    const ctx = document.getElementById('graficoSemanal').getContext('2d');
+
+    // Función para obtener las fechas de la semana actual
+    function obtenerFechasSemanaActual() {
+        const hoy = new Date();
+        const primerDiaSemana = new Date(hoy.setDate(hoy.getDate() - hoy.getDay() + 1)); // Lunes
+        const diasSemana = [];
+
+        for (let i = 0; i < 7; i++) {
+            const dia = new Date(primerDiaSemana);
+            dia.setDate(primerDiaSemana.getDate() + i);
+            diasSemana.push(dia.toLocaleDateString('es-ES', { weekday: 'long' }));
+        }
+
+        return diasSemana;
+    }
+
+    // Función para filtrar los datos de la semana actual
+    function filtrarDatosSemanaActual(datos) {
+        const hoy = new Date();
+        const primerDiaSemana = new Date(hoy.setDate(hoy.getDate() - hoy.getDay() + 1)); // Lunes
+        const ultimoDiaSemana = new Date(primerDiaSemana);
+        ultimoDiaSemana.setDate(primerDiaSemana.getDate() + 6); // Domingo
+
+        return datos.filter(dato => {
+            const fechaDato = new Date(dato.fecha);
+            return fechaDato >= primerDiaSemana && fechaDato <= ultimoDiaSemana;
+        });
+    }
+
+    // Obtener datos desde el backend (simulación con fetch)
+    async function obtenerDatosBackend() {
+        try {
+            const respuesta = await fetch('/api/estadisticas-semanales'); // Cambia esta URL según tu API
+            if (!respuesta.ok) {
+                throw new Error('Error al obtener los datos del backend');
+            }
+            return await respuesta.json();
+        } catch (error) {
+            console.error('Error:', error);
+            return [];
+        }
+    }
+
+    // Cargar y procesar los datos
+    const datosBackend = await obtenerDatosBackend();
+    const datosSemanaActual = filtrarDatosSemanaActual(datosBackend);
+
+    // Obtener etiquetas y valores para el gráfico
+    const etiquetasSemana = obtenerFechasSemanaActual();
+    const valoresSemana = etiquetasSemana.map(dia => {
+        const dato = datosSemanaActual.find(d => 
+            new Date(d.fecha).toLocaleDateString('es-ES', { weekday: 'long' }) === dia
+        );
+        return dato ? dato.valor : 0; // Si no hay datos para ese día, usar 0
+    });
+
+    // Crear el gráfico
+    new Chart(ctx, {
+        type: 'bar', // Cambia a 'line' si prefieres un gráfico de líneas
+        data: {
+            labels: etiquetasSemana,
+            datasets: [{
+                label: 'Ingresos Semanales',
+                data: valoresSemana,
+                backgroundColor: 'rgba(166, 123, 91, 0.5)',
+                borderColor: 'rgba(166, 123, 91, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Ingresos: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Días de la Semana'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Ingresos'
+                    }
+                }
+            }
+        }
+    });
+});
+
 // Función para mostrar mensajes en la interfaz
 function mostrarMensaje(mensaje, tipo) {
     const mensajeDiv = document.getElementById('mensaje');
