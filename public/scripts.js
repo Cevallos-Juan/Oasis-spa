@@ -10,6 +10,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mensaje = document.getElementById('mensaje');
     const submitButton = formIngreso.querySelector('button[type="submit"]');
 
+    // Frases del día
+    const frases = [
+        '"La belleza comienza en el momento en que decides ser tú mismo." - Coco Chanel',
+        '"La felicidad no es algo hecho. Proviene de tus propias acciones." - Dalai Lama',
+        '"El éxito es la suma de pequeños esfuerzos repetidos día tras día." - Robert Collier',
+        '"La vida es 10% lo que te sucede y 90% cómo reaccionas a ello." - Charles R. Swindoll',
+        '"La mejor manera de predecir el futuro es crearlo." - Peter Drucker',
+        '"No cuentes los días, haz que los días cuenten." - Muhammad Ali',
+        '"El único modo de hacer un gran trabajo es amar lo que haces." - Steve Jobs',
+        '"La educación es el arma más poderosa que puedes usar para cambiar el mundo." - Nelson Mandela',
+        '"El fracaso es simplemente la oportunidad de comenzar de nuevo, esta vez con más inteligencia." - Henry Ford',
+        '"La felicidad no es tener lo que quieres, sino querer lo que tienes." - Dale Carnegie',
+        '"El único límite para nuestro logro de mañana será nuestras dudas de hoy." - Franklin D. Roosevelt',
+        '"La creatividad es la inteligencia divirtiéndose." - Albert Einstein',
+        '"El éxito no es la clave de la felicidad. La felicidad es la clave del éxito." - Albert Schweitzer',
+        '"Haz de cada día tu obra maestra." - John Wooden',
+        '"El optimismo es la fe que conduce al logro." - Helen Keller',
+        '"La vida no se trata de encontrarte a ti mismo, sino de crearte a ti mismo." - George Bernard Shaw',
+        '"El coraje es resistencia al miedo, dominio del miedo, no ausencia de miedo." - Mark Twain',
+        '"La única forma de hacer un gran trabajo es amar lo que haces." - Steve Jobs',
+        '"El futuro pertenece a quienes creen en la belleza de sus sueños." - Eleanor Roosevelt',
+        '"No importa lo lento que vayas, siempre y cuando no te detengas." - Confucio',
+        '"El éxito es la habilidad de ir de fracaso en fracaso sin perder el entusiasmo." - Winston Churchill',
+        '"La felicidad no depende de lo que tienes, sino de lo que eres." - Buda',
+        '"El cambio es el resultado final de todo verdadero aprendizaje." - Leo Buscaglia',
+        '"La única manera de hacer algo genial es amar lo que haces." - Steve Jobs',
+        '"La vida es como montar en bicicleta. Para mantener el equilibrio, debes seguir adelante." - Albert Einstein',
+        '"El único lugar donde el éxito viene antes que el trabajo es en el diccionario." - Vidal Sassoon',
+        '"El secreto para salir adelante es comenzar." - Mark Twain',
+        '"La mejor manera de empezar algo es dejar de hablar y comenzar a hacerlo." - Walt Disney',
+        '"El éxito no es definitivo, el fracaso no es fatal: lo que cuenta es el valor para continuar." - Winston Churchill'
+    ];
+
+    // Seleccionar una frase aleatoria
+    const dailyPhraseElement = document.getElementById('dailyPhrase');
+    if (dailyPhraseElement) {
+        const randomIndex = Math.floor(Math.random() * frases.length);
+        dailyPhraseElement.textContent = frases[randomIndex];
+    }
+
     // Variable para evitar múltiples envíos
     let isSubmitting = false;
 
@@ -35,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (response.ok) {
                     const result = await response.json();
-                    mensaje.textContent = result.message;
+                    mensaje.textContent = result.message || 'Ingreso registrado correctamente';
                     mensaje.style.color = 'green';
                     formIngreso.reset(); // Limpiar el formulario después de un envío exitoso
                     cargarIngresos(); // Recargar la tabla de ingresos
