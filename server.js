@@ -293,22 +293,37 @@ app.delete('/api/citas/:id', async (req, res) => {
     }
 });
 
+// Ruta para actualizar una cita
 app.put('/api/citas/:id', async (req, res) => {
     const { id } = req.params;
     const { nombre, servicio, fecha, hora, estado } = req.body;
 
     try {
-        const query = `
-            UPDATE citas
-            SET nombre = $1, servicio = $2, fecha = $3, hora = $4, estado = $5
-            WHERE id = $6
-        `;
-        const params = [nombre, servicio, fecha, hora, estado, id];
-        await db.query(query, params);
-        res.json({ message: 'Cita actualizada correctamente.' });
-    } catch (err) {
-        console.error('Error al actualizar la cita:', err.message);
-        res.status(500).json({ error: 'Error al actualizar la cita.' });
+        // Obtener la cita existente
+        const citaExistente = await db.query('SELECT * FROM citas WHERE id = $1', [id]);
+        if (citaExistente.rowCount === 0) {
+            return res.status(404).json({ error: 'Cita no encontrada' });
+        }
+
+        // Actualizar solo los campos enviados
+        const citaActualizada = {
+            nombre: nombre || citaExistente.rows[0].nombre,
+            servicio: servicio || citaExistente.rows[0].servicio,
+            fecha: fecha || citaExistente.rows[0].fecha,
+            hora: hora || citaExistente.rows[0].hora,
+            estado: estado || citaExistente.rows[0].estado,
+        };
+
+        // Actualizar en la base de datos
+        await db.query(
+            'UPDATE citas SET nombre = $1, servicio = $2, fecha = $3, hora = $4, estado = $5 WHERE id = $6',
+            [citaActualizada.nombre, citaActualizada.servicio, citaActualizada.fecha, citaActualizada.hora, citaActualizada.estado, id]
+        );
+
+        res.json({ message: 'Cita actualizada correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar la cita:', error);
+        res.status(500).json({ error: 'Error al actualizar la cita' });
     }
 });
 
