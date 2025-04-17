@@ -155,11 +155,13 @@
                 pdf.setFontSize(12);
                 pdf.text(`${fechaFormateada}`, 105, 30, { align: 'center' });
 
+                // Ajustar fechas y mapear datos para la tabla
+                console.log(ingresosMes); // Depuración: Verifica los datos que llegan desde la API
                 const ingresosTabla = ingresosMes.map((ingreso) => [
                     ingreso.nombre || 'Sin nombre',
-                    new Date(ingreso.realizado).toLocaleDateString(),
+                    new Date(new Date(ingreso.realizado).getTime() + new Date().getTimezoneOffset() * 60000).toLocaleDateString(), // Ajuste de zona horaria
                     `$${parseFloat(ingreso.monto).toFixed(2)}`,
-                    ingreso.seRealizo || 'Sin información',
+                    ingreso.seRealizo || ingreso.serealizo || 'Sin información', // Verificar si el campo tiene otro nombre
                     ingreso.quien || 'Desconocido',
                 ]);
 
