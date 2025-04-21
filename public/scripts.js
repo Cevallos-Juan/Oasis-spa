@@ -131,40 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
-    // Función para cargar ingresos
-    async function cargarIngresos(filtros = {}) {
-        const resultadosTabla = document.getElementById('resultadosTabla');
-        if (!resultadosTabla) {
-            console.error('Error: No se encontró el elemento <tbody> con el ID "resultadosTabla".');
-            return;
-        }
-
-        resultadosTabla.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
-
-        try {
-            const params = new URLSearchParams(filtros).toString(); // Convertir los filtros en parámetros de consulta
-            const response = await fetch(`/api/ingresos?${params}`); // Enviar los filtros al servidor
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Error al obtener los ingresos.');
-            }
-
-            const ingresos = await response.json();
-
-            if (ingresos.length === 0) {
-                resultadosTabla.innerHTML = '<tr><td colspan="8">No se encontraron resultados.</td></tr>';
-            } else {
-                renderIngresos(ingresos);
-            }
-        } catch (error) {
-            console.error('Error al cargar los ingresos:', error);
-            resultadosTabla.innerHTML = '<tr><td colspan="8">Error al cargar los datos.</td></tr>';
-        }
-    }
-
-    cargarIngresos();
-
+    
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
         filterForm.addEventListener('submit', (event) => {
@@ -470,15 +437,6 @@ document.getElementById('filterForm').addEventListener('submit', (event) => {
     cargarIngresos({ fechaInicio, fechaFin });
 });
 
-document.getElementById('filterForm').addEventListener('submit', (event) => {
-    event.preventDefault(); // Evitar el comportamiento predeterminado del formulario
-
-    const nombre = document.getElementById('searchInput').value.trim(); // Obtener el valor del campo de búsqueda
-    cargarIngresos({ nombre }); // Llamar a la función cargarIngresos con el filtro de nombre
-});
-
-document.getElementById('searchButton').addEventListener('click', buscar);
-
 async function inicializarEstadisticas() {
     let graficoSemanal;
 
@@ -558,7 +516,7 @@ async function inicializarEstadisticas() {
 }
 
 // Función para cargar ingresos (solo para la página de consultar ingresos)
-async function cargarIngresos() {
+async function cargarIngresos(filtros = {}) {
     const resultadosTabla = document.getElementById('resultadosTabla');
     if (!resultadosTabla) {
         console.error('Error: No se encontró el elemento <tbody> con el ID "resultadosTabla".');
@@ -568,7 +526,9 @@ async function cargarIngresos() {
     resultadosTabla.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
 
     try {
-        const response = await fetch('/api/ingresos');
+        // Construir la URL con los filtros como parámetros de consulta
+        const queryParams = new URLSearchParams(filtros).toString();
+        const response = await fetch(`/api/ingresos?${queryParams}`);
         if (!response.ok) {
             throw new Error('Error al obtener los ingresos.');
         }
@@ -924,9 +884,7 @@ function mostrarModal(contenido) {
     modalContent.innerHTML = contenido;
 
     modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-
-    
+    document.body.appendChild(modal); 
 }
 
 function cerrarModal() {
