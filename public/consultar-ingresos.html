@@ -411,12 +411,6 @@
             }
         }
 
-        // Función para buscar en la tabla
-        function buscar() {
-            const nombre = document.getElementById('searchInput').value.trim(); // Obtener el valor del campo de búsqueda
-            cargarIngresos({ nombre }); // Llamar a la función cargarIngresos con el filtro de nombre
-        }
-
         // Función para cargar ingresos en la tabla
         async function cargarIngresos(filtros = {}) {
             const resultadosTabla = document.getElementById('resultadosTabla');
@@ -425,91 +419,13 @@
                 return;
             }
 
-            resultadosTabla.innerHTML = ''; // Limpiar la tabla antes de cargar los datos
-
-            try {
-                const params = new URLSearchParams(filtros).toString(); // Convertir los filtros en parámetros de consulta
-                const response = await fetch(`/api/ingresos?${params}`); // Enviar los filtros al servidor
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Error al obtener los ingresos.');
-                }
-
-                const ingresos = await response.json();
-
-                if (ingresos.length === 0) {
-                    resultadosTabla.innerHTML = '<tr><td colspan="7">No se encontraron resultados.</td></tr>';
-                } else {
-                    ingresos.forEach((ingreso) => {
-                        const fila = document.createElement('tr');
-                        fila.id = `ingreso-${ingreso.id}`;
-                        fila.innerHTML = `
-                            <td>${ingreso.nombre}</td>
-                            <td>$${parseFloat(ingreso.monto).toFixed(2)}</td>
-                            <td>${ingreso.realizado}</td>
-                            <td>${ingreso.quien}</td>
-                            <td>${ingreso.seRealizo}</td>
-                            <td>$${(ingreso.monto * 0.4).toFixed(2)}</td>
-                            <td>
-                                <button onclick="editarIngreso(${ingreso.id})">Editar</button>
-                                <button onclick="eliminarIngreso(${ingreso.id})">Eliminar</button>
-                            </td>
-                        `;
-                        resultadosTabla.appendChild(fila);
-                    });
-                }
-            } catch (error) {
-                console.error('Error al cargar los ingresos:', error);
-                resultadosTabla.innerHTML = '<tr><td colspan="7">Error al cargar los datos.</td></tr>';
-            }
-        }
-
-        // Asociar el evento al botón de búsqueda
-        document.getElementById('searchButton').addEventListener('click', (event) => {
-            event.preventDefault(); // Evitar que el botón recargue la página
-            buscar(); // Llamar a la función buscar
-        });
-
-        // Inicializar la página
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarIngresos(); // Cargar todos los ingresos al inicio
-        });
-
-        // Función para actualizar los registros diarios
-        async function actualizarRegistrosDiarios() {
-            const registrosDiarios = document.getElementById('registrosDiarios');
-            const ingresosDiarios = document.getElementById('ingresosDiarios');
-
-            try {
-                const response = await fetch('/api/ingresos');
-                if (!response.ok) throw new Error('Error al obtener los ingresos.');
-                const ingresos = await response.json();
-
-                const hoy = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
-                const ingresosHoy = ingresos.filter((ingreso) => ingreso.realizado === hoy);
-
-                const totalHoy = ingresosHoy.reduce((total, ingreso) => total + ingreso.monto, 0);
-
-                registrosDiarios.textContent = ingresosHoy.length;
-                ingresosDiarios.textContent = `$${totalHoy.toFixed(2)}`;
-            } catch (error) {
-                console.error('Error al actualizar los registros diarios:', error);
-            }
+            resultadosTabla.innerHTML = ''; // Limpiar la tabla antes de cargar los datos 
         }
 
         // Inicializar la página
         document.addEventListener('DOMContentLoaded', () => {
             cargarIngresos();
         });
-
-        // Asociar el evento al botón de búsqueda
-        document.getElementById('searchButton').addEventListener('click', buscar);
-
-        // Función para buscar en la tabla
-        function buscar() {
-            const nombre = document.getElementById('searchInput').value.trim(); // Obtener el valor del campo de búsqueda
-            cargarIngresos({ nombre }); // Llamar a la función cargarIngresos con el filtro de nombre
-        }
 
         // Asociar el evento al botón de búsqueda rápida
         document.getElementById('searchButton').addEventListener('click', (event) => {
