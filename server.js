@@ -66,9 +66,6 @@ function validarCita({ nombre, servicio, fecha, hora }) {
 }
 
 // Endpoints de la API
-
-// Cambios en las consultas SQL
-
 // **1. Registrar un ingreso**
 app.post('/api/ingresos', (req, res) => {
     upload(req, res, async (err) => {
