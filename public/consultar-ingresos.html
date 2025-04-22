@@ -261,7 +261,23 @@
                 </div>
             </div>
 
-            
+            <div class="floating-box">
+                <h3>Buscar por Nombre de Trabajadora y Fecha</h3>
+                <form id="filterForm" style="text-align: center;">
+                    <div class="filters" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <label for="realizadoPor">Realizado por:</label>
+                        <input type="text" id="realizadoPor" placeholder="Nombre de quien realizó" style="width: 500%; max-width: 300px;">
+
+                        <label for="fechaInicio">Fecha Inicio:</label>
+                        <input type="date" id="fechaInicio" style="width: 500%; max-width: 300px;">
+
+                        <label for="fechaFin">Fecha Fin:</label>
+                        <input type="date" id="fechaFin" style="width: 500%; max-width: 300px;">
+
+                        <button type="submit" style="width: 100%; max-width: 150px;">Buscar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </main>
     <!-- Modal reutilizable -->
