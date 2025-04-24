@@ -331,6 +331,7 @@ app.get('/api/estadisticas', async (req, res) => {
                 TO_CHAR(realizado, 'YYYY-MM-DD') AS fecha,
                 SUM(monto) AS total
             FROM ingresos
+            WHERE realizado >= NOW() - INTERVAL '7 days'
             GROUP BY TO_CHAR(realizado, 'YYYY-MM-DD')
             ORDER BY fecha;
         `;
