@@ -152,8 +152,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }    
 });
 
-
-
 // Función para mostrar mensajes en la interfaz
 function mostrarMensaje(mensaje, tipo) {
     const mensajeDiv = document.getElementById('mensaje');
@@ -192,84 +190,6 @@ document.getElementById('filterForm').addEventListener('submit', (event) => {
     // Llamar a la función cargarIngresos con los filtros de fecha
     cargarIngresos({ fechaInicio, fechaFin });
 });
-
-async function inicializarEstadisticas() {
-    let graficoSemanal;
-
-    async function obtenerEstadisticas() {
-        try {
-            const response = await fetch('/api/estadisticas');
-            if (!response.ok) {
-                throw new Error('Error al obtener las estadísticas.');
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Error al obtener estadísticas:', error);
-            const container = document.querySelector('.container');
-            if (container) {
-                container.innerHTML = '<p style="color: red; text-align: center;">Error al cargar las estadísticas. Inténtalo más tarde.</p>';
-            }
-            return null;
-        }
-    }
-
-    function actualizarGraficos(estadisticas) {
-        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const ingresosPorDia = Array(7).fill(0);
-
-        if (estadisticas && estadisticas.porDia) {
-            estadisticas.porDia.forEach(item => {
-                const diaIndex = parseInt(item.dia);
-                if (!isNaN(diaIndex) && diaIndex >= 0 && diaIndex < 7) {
-                    ingresosPorDia[diaIndex] = item.total;
-                }
-            });
-        }
-
-        if (graficoSemanal) {
-            graficoSemanal.destroy();
-        }
-
-        const ctxSemanal = graficoSemanalCanvas.getContext('2d');
-        graficoSemanal = new Chart(ctxSemanal, {
-            type: 'bar',
-            data: {
-                labels: diasSemana,
-                datasets: [{
-                    label: 'Ingresos por Día',
-                    data: ingresosPorDia,
-                    backgroundColor: 'rgba(166, 123, 91, 0.2)',
-                    borderColor: 'rgba(166, 123, 91, 1)',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: true, position: 'top' }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-
-    const estadisticas = await obtenerEstadisticas();
-    if (!estadisticas) return;
-
-    actualizarGraficos(estadisticas);
-
-    // Actualizar el gráfico cada 60 segundos
-    setInterval(async () => {
-        const nuevasEstadisticas = await obtenerEstadisticas();
-        if (nuevasEstadisticas) {
-            actualizarGraficos(nuevasEstadisticas);
-        }
-    }, 60000);
-}
 
 // Función para cargar ingresos (solo para la página de consultar ingresos)
 async function cargarIngresos(filtros = {}) {
