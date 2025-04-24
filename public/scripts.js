@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('El archivo scripts.js se está ejecutando.');
+
+    // Verificar si estamos en la página de estadísticas
+    const canvas = document.getElementById('graficoSemanal');
+    if (canvas) {
+        cargarEstadisticas(); // Llamar a la función solo si el canvas existe
+    }
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -568,3 +574,78 @@ function cerrarModal() {
         modal.remove();
     }
 }
+
+async function cargarEstadisticas() {
+    const loadingMessage = document.getElementById('loadingMessage');
+    const canvas = document.getElementById('graficoSemanal');
+
+    if (!loadingMessage || !canvas) {
+        console.error('Elementos necesarios para cargar las estadísticas no encontrados.');
+        return;
+    }
+
+    try {
+        // Mostrar mensaje de carga
+        loadingMessage.style.display = 'block';
+
+        // Obtener datos del servidor
+        const response = await fetch('/api/estadisticas');
+        if (!response.ok) throw new Error('Error al cargar las estadísticas.');
+
+        const datos = await response.json();
+
+        // Procesar los datos para el gráfico
+        const labels = datos.map(d => d.fecha);
+        const valores = datos.map(d => parseFloat(d.total));
+
+        // Crear el gráfico
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ingresos diarios',
+                    data: valores,
+                    borderColor: '#A67B5B',
+                    backgroundColor: 'rgba(166, 123, 91, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Fecha'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Monto ($)'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Ocultar mensaje de carga
+        loadingMessage.style.display = 'none';
+    } catch (error) {
+        console.error('Error al cargar las estadísticas:', error);
+        loadingMessage.textContent = 'Error al cargar los datos.';
+    }
+}
+
+// Llamar a la función al cargar la página
+document.addEventListener('DOMContentLoaded', cargarEstadisticas);
