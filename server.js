@@ -211,25 +211,6 @@ app.get('/api/citas', async (req, res) => {
     }
 });
 
-// **Endpoint para obtener estadísticas semanales**
-app.get('/api/estadisticas', (req, res) => {
-    const query = `
-        SELECT EXTRACT(DOW FROM realizado) AS dia, SUM(monto) AS total
-        FROM ingresos
-        GROUP BY dia
-        ORDER BY dia;
-    `;
-
-    db.query(query, [], (err, rows) => {
-        if (err) {
-            console.error('Error al obtener las estadísticas:', err.message);
-            return res.status(500).json({ error: 'Error al obtener las estadísticas.' });
-        }
-
-        res.status(200).json({ porDia: rows.rows });
-    });
-});
-
 // Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -340,5 +321,38 @@ app.get('/api/citas/:id', async (req, res) => {
     } catch (err) {
         console.error('Error al obtener la cita:', err.message);
         res.status(500).json({ error: 'Error al obtener la cita.' });
+    }
+});
+
+app.get('/api/estadisticas', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                TO_CHAR(realizado, 'YYYY-MM-DD') AS fecha,
+                SUM(monto) AS total
+            FROM ingresos
+            GROUP BY TO_CHAR(realizado, 'YYYY-MM-DD')
+            ORDER BY fecha;
+        `;
+        const result = await db.query(query);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error al obtener las estadísticas:', err.message);
+        res.status(500).json({ error: 'Error al obtener las estadísticas.' });
+    }
+});
+
+app.get('/api/ingresos-semana', async (req, res) => {
+    try {
+        const query = `
+            SELECT fecha, monto
+            FROM ingresos
+            WHERE fecha >= DATEADD(DAY, -7, GETDATE()) AND fecha <= GETDATE();
+        `;
+        const result = await db.query(query);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error al obtener los ingresos de la semana:', err.message);
+        res.status(500).json({ error: 'Error al obtener los ingresos de la semana.' });
     }
 });
