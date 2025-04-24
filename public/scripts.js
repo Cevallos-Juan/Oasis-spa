@@ -149,254 +149,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Llamar a la función cargarIngresos con los filtros de fecha
             cargarIngresos({ fechaInicio, fechaFin });
         });
-    }
-
-    // Verifica si estamos en la página de estadísticas
-    if (document.getElementById('graficoSemanal')) {
-        inicializarEstadisticas();
-    }
-
-    const graficoSemanalCanvas = document.getElementById('graficoSemanal');
-    if (!graficoSemanalCanvas) {
-        console.error('No se encontró el elemento <canvas> para el gráfico.');
-        return;
-    }
-
-    async function obtenerEstadisticas() {
-        try {
-            const response = await fetch('/api/estadisticas');
-            if (!response.ok) {
-                throw new Error('Error al obtener las estadísticas.');
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Error al obtener estadísticas:', error);
-            return null;
-        }
-    }
-
-    function actualizarGraficos(estadisticas) {
-        if (!estadisticas || estadisticas.porDia.length === 0) {
-            console.error('No hay datos para mostrar en el gráfico.');
-            const container = document.querySelector('.floating-box');
-            container.innerHTML = '<p>No hay datos disponibles para las estadísticas semanales.</p>';
-            return;
-        }
-
-        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const ingresosPorDia = Array(7).fill(0);
-
-        estadisticas.porDia.forEach((item) => {
-            const diaIndex = parseInt(item.dia);
-            if (!isNaN(diaIndex) && diaIndex >= 0 && diaIndex < 7) {
-                ingresosPorDia[diaIndex] = item.total;
-            }
-        });
-
-        const ctxSemanal = graficoSemanalCanvas.getContext('2d');
-        new Chart(ctxSemanal, {
-            type: 'bar',
-            data: {
-                labels: diasSemana,
-                datasets: [{
-                    label: 'Ingresos por Día',
-                    data: ingresosPorDia,
-                    backgroundColor: 'rgba(166, 123, 91, 0.2)',
-                    borderColor: 'rgba(166, 123, 91, 1)',
-                    borderWidth: 2,
-                }],
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true },
-                },
-            },
-        });
-    }
-
-    const estadisticas = await obtenerEstadisticas();
-    if (estadisticas) {
-        actualizarGraficos(estadisticas);
-    }
+    }    
 });
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('El archivo scripts.js se está ejecutando.');
 
-    const graficoSemanalCanvas = document.getElementById('graficoSemanal');
-    if (!graficoSemanalCanvas) {
-        console.error('No se encontró el elemento <canvas> para el gráfico.');
-        return;
-    }
-
-    async function obtenerEstadisticas() {
-        try {
-            const response = await fetch('/api/estadisticas');
-            if (!response.ok) {
-                throw new Error('Error al obtener las estadísticas.');
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Error al obtener estadísticas:', error);
-            const container = document.querySelector('.floating-box');
-            if (container) {
-                container.innerHTML = '<p style="color: red; text-align: center;">Error al cargar las estadísticas. Inténtalo más tarde.</p>';
-            }
-            return null;
-        }
-    }
-
-    function actualizarGraficos(estadisticas) {
-        if (!estadisticas || !estadisticas.porDia || estadisticas.porDia.length === 0) {
-            console.error('No hay datos para mostrar en el gráfico.');
-            const container = document.querySelector('.floating-box');
-            container.innerHTML = '<p>No hay datos disponibles para las estadísticas semanales.</p>';
-            return;
-        }
-
-        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const ingresosPorDia = Array(7).fill(0);
-
-        estadisticas.porDia.forEach((item) => {
-            const diaIndex = parseInt(item.dia, 10);
-            if (!isNaN(diaIndex) && diaIndex >= 0 && diaIndex < 7) {
-                ingresosPorDia[diaIndex] = parseFloat(item.total); // Asegúrate de que sea un número
-            }
-        });
-
-        const ctxSemanal = graficoSemanalCanvas.getContext('2d');
-        new Chart(ctxSemanal, {
-            type: 'bar',
-            data: {
-                labels: diasSemana,
-                datasets: [{
-                    label: 'Ingresos por Día',
-                    data: ingresosPorDia,
-                    backgroundColor: 'rgba(166, 123, 91, 0.2)',
-                    borderColor: 'rgba(166, 123, 91, 1)',
-                    borderWidth: 2,
-                }],
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true },
-                },
-            },
-        });
-    }
-
-    const estadisticas = await obtenerEstadisticas();
-    if (estadisticas) {
-        actualizarGraficos(estadisticas);
-    }
-});
-
-document.addEventListener("DOMContentLoaded", async () => {
-    const ctx = document.getElementById('graficoSemanal').getContext('2d');
-
-    // Función para obtener las fechas de la semana actual
-    function obtenerFechasSemanaActual() {
-        const hoy = new Date();
-        const primerDiaSemana = new Date(hoy.setDate(hoy.getDate() - hoy.getDay() + 1)); // Lunes
-        const diasSemana = [];
-
-        for (let i = 0; i < 7; i++) {
-            const dia = new Date(primerDiaSemana);
-            dia.setDate(primerDiaSemana.getDate() + i);
-            diasSemana.push(dia.toLocaleDateString('es-ES', { weekday: 'long' }));
-        }
-
-        return diasSemana;
-    }
-
-    // Función para filtrar los datos de la semana actual
-    function filtrarDatosSemanaActual(datos) {
-        const hoy = new Date();
-        const primerDiaSemana = new Date(hoy.setDate(hoy.getDate() - hoy.getDay() + 1)); // Lunes
-        const ultimoDiaSemana = new Date(primerDiaSemana);
-        ultimoDiaSemana.setDate(primerDiaSemana.getDate() + 6); // Domingo
-
-        return datos.filter(dato => {
-            const fechaDato = new Date(dato.fecha);
-            return fechaDato >= primerDiaSemana && fechaDato <= ultimoDiaSemana;
-        });
-    }
-
-    // Obtener datos desde el backend (simulación con fetch)
-    async function obtenerDatosBackend() {
-        try {
-            const respuesta = await fetch('/api/estadisticas-semanales'); // Cambia esta URL según tu API
-            if (!respuesta.ok) {
-                throw new Error('Error al obtener los datos del backend');
-            }
-            return await respuesta.json();
-        } catch (error) {
-            console.error('Error:', error);
-            return [];
-        }
-    }
-
-    // Cargar y procesar los datos
-    const datosBackend = await obtenerDatosBackend();
-    const datosSemanaActual = filtrarDatosSemanaActual(datosBackend);
-
-    // Obtener etiquetas y valores para el gráfico
-    const etiquetasSemana = obtenerFechasSemanaActual();
-    const valoresSemana = etiquetasSemana.map(dia => {
-        const dato = datosSemanaActual.find(d => 
-            new Date(d.fecha).toLocaleDateString('es-ES', { weekday: 'long' }) === dia
-        );
-        return dato ? dato.valor : 0; // Si no hay datos para ese día, usar 0
-    });
-
-    // Crear el gráfico
-    new Chart(ctx, {
-        type: 'bar', // Cambia a 'line' si prefieres un gráfico de líneas
-        data: {
-            labels: etiquetasSemana,
-            datasets: [{
-                label: 'Ingresos Semanales',
-                data: valoresSemana,
-                backgroundColor: 'rgba(166, 123, 91, 0.5)',
-                borderColor: 'rgba(166, 123, 91, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `Ingresos: ${context.raw}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Días de la Semana'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Ingresos'
-                    }
-                }
-            }
-        }
-    });
-});
 
 // Función para mostrar mensajes en la interfaz
 function mostrarMensaje(mensaje, tipo) {
@@ -571,7 +327,7 @@ async function cargarCitas() {
                     <td>${cita.nombre || 'Sin nombre'}</td>
                     <td>${cita.fecha || 'Sin fecha'}</td>
                     <td>${cita.hora || 'Sin hora'}</td>
-                    <td>${cita.servicio || 'Sin servicio'}</td>
+                    <td ${cita.servicio || 'Sin servicio'}</td>
                     <td>${cita.estado || 'Pendiente'}</td>
                     <td>
                         <button onclick="editarCita(${cita.id})">Editar</button>
@@ -812,12 +568,11 @@ async function editarCita(id) {
                 });
 
                 if (response.ok) {
-                    mostrarMensajeFlotante('Cita editada correctamente');
-                    cerrarModal(); // Cerrar el modal después de guardar
-                    cargarCitas(); // Recargar la tabla
+                    mostrarModal('<p>Cita editada correctamente.</p><button onclick="cerrarModal()">Cerrar</button>');
+                    cargarCitas(); // Recargar la tabla de citas
                 } else {
                     const error = await response.json();
-                    mostrarModal(`<p>Error al editar la cita: ${error.error}</p><button onclick="cerrarModal()">Cerrar</button>`);
+                    mostrarModal(`<p>Error al editar la cita: ${error.error || 'Error desconocido.'}</p><button onclick="cerrarModal()">Cerrar</button>`);
                 }
             } catch (error) {
                 console.error('Error al editar la cita:', error);
