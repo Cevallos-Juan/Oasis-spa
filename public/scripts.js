@@ -598,19 +598,23 @@ async function cargarEstadisticas() {
         const labels = datos.map(d => d.fecha);
         const valores = datos.map(d => parseFloat(d.total));
 
-        // Crear el gráfico
+        // Crear un degradado para el gráfico
         const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)'); // Color inicial
+        gradient.addColorStop(1, 'rgba(153, 102, 255, 0.8)'); // Color final
+
+        // Crear el gráfico
         new Chart(ctx, {
-            type: 'line',
+            type: 'bar', // Gráfico de barras
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Ingresos diarios',
+                    label: 'Ingresos diarios (últimos 7 días)',
                     data: valores,
-                    borderColor: '#A67B5B',
-                    backgroundColor: 'rgba(166, 123, 91, 0.2)',
-                    borderWidth: 2,
-                    tension: 0.3,
+                    backgroundColor: gradient, // Aplicar el degradado
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -619,19 +623,45 @@ async function cargarEstadisticas() {
                     legend: {
                         display: true,
                         position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `$${context.raw.toFixed(2)}`;
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Fecha'
+                            text: 'Fecha',
+                            color: '#333',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        ticks: {
+                            color: '#555'
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Monto ($)'
+                            text: 'Monto ($)',
+                            color: '#333',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        ticks: {
+                            color: '#555',
+                            callback: function(value) {
+                                return `$${value}`;
+                            }
                         },
                         beginAtZero: true
                     }
