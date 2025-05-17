@@ -112,6 +112,9 @@ app.get('/api/ingresos', async (req, res) => {
             params.push(`%${nombre}%`);
         }
 
+        // Ordenar por fecha descendente y luego por id descendente
+        query += ' ORDER BY realizado DESC, id DESC';
+
         const result = await db.query(query, params);
         res.json(result.rows);
     } catch (err) {
