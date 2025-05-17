@@ -610,7 +610,7 @@ async function cargarEstadisticas() {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Ingresos diarios (últimos 7 días)',
+                    label: 'Ingresos diarios (últimos días)',
                     data: valores,
                     backgroundColor: gradient, // Aplicar el degradado
                     borderColor: 'rgba(75, 192, 192, 1)',
