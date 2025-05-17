@@ -326,7 +326,7 @@ function renderIngresos(ingresos) {
                 <td>${fechaFormateada}</td>
                 <td>${ingreso.quien}</td>
                 <td>${seRealizo}</td>
-                <td>${(ingreso.monto * 0.4).toFixed(2)}</td>
+                <td>$${(ingreso.monto * 0.4).toFixed(2)}</td>
                 <td>
                     <button class="btn-editar" onclick="editarIngreso(${ingreso.id})">Editar</button>
                     <button class="btn-eliminar" onclick="eliminarIngreso(${ingreso.id})">Eliminar</button>
