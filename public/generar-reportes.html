@@ -144,23 +144,45 @@
                     return;
                 }
 
+                // Formatear fechas
+                function formatearFechaYMD(fecha) {
+                    const d = new Date(fecha);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return `${year}/${month}/${day}`;
+                }
+
+                function formatearHora(fecha) {
+                    const d = new Date(fecha);
+                    const h = String(d.getHours()).padStart(2, '0');
+                    const m = String(d.getMinutes()).padStart(2, '0');
+                    const s = String(d.getSeconds()).padStart(2, '0');
+                    return `${h}:${m}:${s}`;
+                }
+
                 // Crear el PDF
-                const fechaFormateada = fechaActual.toLocaleDateString();
                 const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
                 const mesTexto = meses[mesActual];
 
+                // Título en negritas y centrado
+                pdf.setFont('helvetica', 'bold');
                 pdf.setFontSize(18);
-                pdf.text(`Reporte Mensual de Ingresos - ${mesTexto}`, 105, 20, { align: 'center' });
-                pdf.setFontSize(12);
-                pdf.text(`${fechaFormateada}`, 105, 30, { align: 'center' });
+                pdf.text(`Reporte Mensual - ${mesTexto}`, 105, 20, { align: 'center' });
 
-                // Ajustar fechas y mapear datos para la tabla
-                console.log(ingresosMes); // Depuración: Verifica los datos que llegan desde la API
+                // Fecha de generación (a los lados, formato año/mes/día hora:min:seg)
+                const fechaGen = formatearFechaYMD(fechaActual);
+                const horaGen = formatearHora(fechaActual);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(12);
+                pdf.text(`${fechaGen}     ${horaGen}`, 105, 30, { align: 'center' });
+
+                // Mapear datos para la tabla, fecha en formato año/mes/día
                 const ingresosTabla = ingresosMes.map((ingreso) => [
                     ingreso.nombre || 'Sin nombre',
-                    new Date(new Date(ingreso.realizado).getTime() + new Date().getTimezoneOffset() * 60000).toLocaleDateString(), // Ajuste de zona horaria
+                    formatearFechaYMD(new Date(new Date(ingreso.realizado).getTime() + new Date().getTimezoneOffset() * 60000)),
                     `$${parseFloat(ingreso.monto).toFixed(2)}`,
-                    ingreso.seRealizo || ingreso.serealizo || 'Sin información', // Verificar si el campo tiene otro nombre
+                    ingreso.seRealizo || ingreso.serealizo || 'Sin información',
                     ingreso.quien || 'Desconocido',
                 ]);
 
@@ -169,8 +191,9 @@
                     body: ingresosTabla,
                     startY: 40,
                     theme: 'grid',
-                    headStyles: { fillColor: [166, 123, 91] },
-                    styles: { font: 'helvetica', fontSize: 12, cellPadding: 5 },
+                    headStyles: { fillColor: [166, 123, 91], halign: 'center', valign: 'middle' },
+                    styles: { font: 'helvetica', fontSize: 12, cellPadding: 5, halign: 'center', valign: 'middle' },
+                    bodyStyles: { halign: 'center', valign: 'middle' },
                 });
 
                 const totalMensual = ingresosMes.reduce((acc, ingreso) => acc + parseFloat(ingreso.monto), 0);
